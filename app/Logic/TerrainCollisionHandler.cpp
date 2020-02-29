@@ -19,7 +19,12 @@ TerrainCollisionHandler::TerrainCollisionHandler()
 void TerrainCollisionHandler::update(const Grid& grid, Camera& camera, double delta)
 {
   auto camPos = camera.getPosition();
-  double height = grid.heightAt(camPos.x, camPos.z) + 2.0;
+  double height;
+  if (!grid.heightAt(camPos.x, camPos.z, &height)) {
+    return;
+  }
+
+  height += 2.0;
 
   if (std::fabs(height - (double)camPos.y) < 0.0001) return;
 

@@ -28,13 +28,13 @@ VertexArray::VertexArray(GLfloat* vertices, GLint numVerts, GLfloat* normals, GL
 
 	glGenBuffers(1, &_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-	glBufferData(GL_ARRAY_BUFFER, floatPerVertex * numVerts * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
 	glVertexAttribPointer(Shader::VERTEX_ATTRIB_LOC, floatPerVertex, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(Shader::VERTEX_ATTRIB_LOC);
 
 	glGenBuffers(1, &_nbo);
 	glBindBuffer(GL_ARRAY_BUFFER, _nbo);
-	glBufferData(GL_ARRAY_BUFFER, 2 * numNormals * sizeof(GLfloat), normals, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, numNormals * sizeof(GLfloat), normals, GL_STATIC_DRAW);
 	glVertexAttribPointer(Shader::NORMAL_ATTRIB_LOC, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(Shader::NORMAL_ATTRIB_LOC);
 

@@ -8,6 +8,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/transform.hpp>
 
+#include "Camera.h"
+#include "Lowlevel/IndexedVertexArray.h"
 #include "../Utils/GraphicsUtils.h"
 
 Grid::Grid()
@@ -29,6 +31,25 @@ Grid::Grid()
   createMesh();
 }
 
+Grid::Grid(float* verts, float* normals, unsigned* indices, std::size_t size, const glm::vec3& position)
+  : _verts(verts)
+  , _normals(normals)
+  , _indices(indices)
+  , _position(position)
+  , _size(size)
+  , _modelMatrix(glm::scale(glm::vec3(1.0)))
+  , _mesh(nullptr)
+  , _shader(
+    "/home/christoph/dev/3D-Playground/app/Graphics/grid.vert",
+    "/home/christoph/dev/3D-Playground/app/Graphics/grid.frag")
+{
+  unsigned numVerts = (_size + 1) * (_size + 1) * 3;
+  unsigned numNormals = (_size + 1) * (_size + 1) * 3;
+  unsigned numIndices = _size * _size * 6;
+
+  _mesh = std::make_unique<IndexedVertexArray>(verts, indices, normals, numNormals, numVerts, numIndices, 3);
+}
+
 Grid::~Grid()
 {
   _mesh = nullptr;
@@ -39,8 +60,6 @@ Grid::~Grid()
 
 void Grid::createMesh()
 {
-  double start = glfwGetTime();
-
   const siv::PerlinNoise perlin(129832);
   const double frequency = 2.0;
   const double amplitude = 74.0;
@@ -102,23 +121,22 @@ void Grid::createMesh()
   _indices = indices;
 
   _mesh = std::make_unique<IndexedVertexArray>(verts, indices, normals, numNormals, numVerts, numIndices, 3);
-  double end = glfwGetTime();
-  printf("createMesh took %lf ms\n", (end - start) * 1000.0);
 }
 
-double Grid::heightAt(double x, double z) const
+bool Grid::heightAt(double x, double z, double* heightOut) const
 {
-  if (!_mesh) return 0.0;
+  if (!_mesh) return false;
 
   x = x - _position.x;
   z = z - _position.z;
 
   if (x < 0.0 || x > _size || z < 0.0 || z > _size) {
-    printf("Cannot get height at %lf, %lf, outside range\n", x, z);
-    return 0.0;
+    //printf("Cannot get height at %lf, %lf, outside range\n", x, z);
+    return false;
   }
 
-  return _position.y + static_cast<double>(_verts[3 * (_size + 1) * (int)z + 3 * (int)x + 1]);
+  *heightOut = _position.y + static_cast<double>(_verts[3 * (_size + 1) * (int)z + 3 * (int)x + 1]);
+  return true;
 }
 
 const glm::vec3& Grid::getPosition()

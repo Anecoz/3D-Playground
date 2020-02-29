@@ -1,22 +1,25 @@
 #pragma once
 
-#include "Lowlevel/IndexedVertexArray.h"
 #include "Lowlevel/Shader.h"
-#include "Camera.h"
 
 #include <glm/glm.hpp>
 
+#include <cstddef>
 #include <memory>
+
+class IndexedVertexArray;
+class Camera;
 
 class Grid
 {
 public:
   Grid();
+  Grid(float* verts, float* normals, unsigned* indices, std::size_t size, const glm::vec3& position);
   ~Grid();
 
   void draw(const Camera& camera);
 
-  double heightAt(double x, double z) const;
+  bool heightAt(double x, double z, double* heightOut) const;
   const glm::vec3& getPosition();
 
 private:
@@ -27,7 +30,7 @@ private:
   unsigned* _indices;
 
   glm::vec3 _position;
-  unsigned _size;
+  std::size_t _size;
 
   glm::mat4 _modelMatrix;
   std::unique_ptr<IndexedVertexArray> _mesh;
