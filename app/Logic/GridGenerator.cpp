@@ -9,8 +9,12 @@
 #include "../Graphics/Camera.h"
 #include "../PerlinNoise.hpp"
 
+#include <noise/noise.h>
+#include <noise/noiseutils.h>
+
 GridGenerator::GridGenerator()
   : _numWorkers(4)
+  //, _noiseGenerator(_gridSize)
 {
   _workers.reserve(_numWorkers);
   for (unsigned i = 0; i < _numWorkers; ++i) {
@@ -20,6 +24,7 @@ GridGenerator::GridGenerator()
 
 GridGenerator::GridGenerator(std::size_t numWorkerThreads)
   : _numWorkers(numWorkerThreads)
+  //, _noiseGenerator(_gridSize)
 {
   _workers.reserve(_numWorkers);
   for (unsigned i = 0; i < _numWorkers; ++i) {
@@ -101,7 +106,6 @@ void GridGenerator::update(const Camera& camera, double delta, std::vector<Grid*
   }
 
   // Any grids to unload?
-  // For now, just unload every grid we're not standing on...
   for (auto it = _grids.begin(); it != _grids.end();) {
     if (it->_index._x > camxIdx + 1 ||
         it->_index._x < camxIdx - 1 ||
@@ -124,12 +128,14 @@ void GridGenerator::update(const Camera& camera, double delta, std::vector<Grid*
 
 GridGenerator::GridData* GridGenerator::Worker::generateData(std::size_t size, const glm::vec3& posOffset)
 {
-  const siv::PerlinNoise perlin(129832);
-  const double frequency = 2.0;
-  const double amplitude = 74.0;
-  const int octaves = 8;
-  const double fx = (double)size / frequency;
-  const double fy = (double)size / frequency;
+  //const siv::PerlinNoise perlin(129832);
+  //const double frequency = 2.0;
+  //const double amplitude = 74.0;
+  //const int octaves = 4;
+  //const double fx = (double)size / frequency;
+  //const double fy = (double)size / frequency;
+
+  NoiseGenerator generator(size, (int)posOffset.x, (int)posOffset.z);
 
   unsigned numVerts = (size + 1) * (size + 1) * 3;
   unsigned numNormals = (size + 1) * (size + 1) * 3;
@@ -144,9 +150,10 @@ GridGenerator::GridData* GridGenerator::Worker::generateData(std::size_t size, c
 
   for (unsigned y = 0; y <= size; ++y) {
     for (unsigned x = 0; x <= size; ++x) {
-      double dx = static_cast<double>(posOffset.x + x);
-      double dy = static_cast<double>(posOffset.z + y);
-      double height = amplitude * (GLfloat)perlin.accumulatedOctaveNoise2D_0_1(dx/fx, dy/fy, octaves);
+      double dx = static_cast<double>(x);
+      double dy = static_cast<double>(y);
+      //double height = amplitude * (GLfloat)perlin.accumulatedOctaveNoise2D_0_1(dx/fx, dy/fy, octaves);
+      double height = generator.getAt(x, y);
 
       unsigned offset = 3 * (y * (size + 1));
       data->_vertices[offset + (x * 3) + 0] = (GLfloat)x;
@@ -155,16 +162,18 @@ GridGenerator::GridData* GridGenerator::Worker::generateData(std::size_t size, c
 
       double offsetX = dx + 0.01;
       double offsetY = dy + 0.01;
-      double dHeightX = amplitude * (GLfloat)perlin.accumulatedOctaveNoise2D_0_1(offsetX/fx, dy/fy, octaves);
-      double dHeightY = amplitude * (GLfloat)perlin.accumulatedOctaveNoise2D_0_1(dx/fx, offsetY/fy, octaves);
+      //double dHeightX = amplitude * (GLfloat)perlin.accumulatedOctaveNoise2D_0_1(offsetX/fx, dy/fy, octaves);
+      //double dHeightY = amplitude * (GLfloat)perlin.accumulatedOctaveNoise2D_0_1(dx/fx, offsetY/fy, octaves);
+      double dHeightX = generator.getAt(x + 1, y);
+      double dHeightY = generator.getAt(x, y + 1);
 
       glm::vec3 p1(dx, height, dy);
-      glm::vec3 p2(offsetX, dHeightX, dy);
-      glm::vec3 p3(dx, dHeightY, offsetY);
+      glm::vec3 p2(dx + 1.0, dHeightX, dy);
+      glm::vec3 p3(dx, dHeightY, dy + 1.0);
 
       glm::vec3 ax1 = p2 - p1;
       glm::vec3 ax2 = p3 - p1;
-      glm::vec3 norm = glm::normalize(glm::cross(ax1, ax2)); 
+      glm::vec3 norm = -glm::normalize(glm::cross(ax1, ax2)); 
 
       data->_normals[3 * (y * (size + 1)) + (x * 3) + 0] = norm.x;
       data->_normals[3 * (y * (size + 1)) + (x * 3) + 1] = norm.y;

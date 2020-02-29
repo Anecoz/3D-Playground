@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Graphics/Grid.h"
+#include "NoiseGenerator.h"
 
 #include <glm/glm.hpp>
 
@@ -88,4 +89,6 @@ private:
   const std::size_t _gridSize = 512;
   std::vector<GridEntry> _grids;
   std::vector<GridIndex> _currentlyGenerating;
+
+  //NoiseGenerator _noiseGenerator;
 };
