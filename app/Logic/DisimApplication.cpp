@@ -1,4 +1,7 @@
 #include "DisimApplication.h"
+
+#include "../Utils/GraphicsUtils.h"
+
 #include <GLFW/glfw3.h>
 
 #include <stdio.h>
@@ -14,10 +17,10 @@ DisimApplication::DisimApplication()
 
 void DisimApplication::render()
 {
-  //_cube.draw(_camera);
-  for (auto grid: _currentGrids) {
+  _cube.draw(_camera);
+  /*for (auto grid: _currentGrids) {
     grid->draw(_camera);
-  }
+  }*/
 }
 
 void DisimApplication::update(double delta)

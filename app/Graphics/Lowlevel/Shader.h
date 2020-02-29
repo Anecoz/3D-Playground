@@ -17,6 +17,7 @@ public:
 	static const GLint VERTEX_ATTRIB_LOC = 0;
 	static const GLint TEX_ATTRIB_LOC = 1;
   static const GLint NORMAL_ATTRIB_LOC = 2;
+  static const GLint COLOR_ATTRIB_LOC = 3;
 
 	GLuint getId();
 	void bind();

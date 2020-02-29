@@ -51,7 +51,7 @@ IndexedVertexArray* GraphicsUtils::createUnitCube()
 }
 
 IndexedVertexArray* GraphicsUtils::createModelQuad(float width, float height, float layer) {
-	GLfloat* vertices = new GLfloat[12];
+	/*GLfloat* vertices = new GLfloat[12];
 	vertices[0] = 0.0f; vertices[1] = 0.0f; vertices[2] = layer;	
 	vertices[3] = 0.0f; vertices[4] = height; vertices[5] = layer;	
 	vertices[6] = width; vertices[7] = 0.0f; vertices[8] = layer;
@@ -67,7 +67,8 @@ IndexedVertexArray* GraphicsUtils::createModelQuad(float width, float height, fl
 	indices[0] = 0; indices[1] = 1; indices[2] = 2;
 	indices[3] = 2; indices[4] = 1; indices[5] = 3;
 	
-	return new IndexedVertexArray(vertices, texCoords, indices, 4, 6, 4, 3);
+	return new IndexedVertexArray(vertices, texCoords, indices, 4, 6, 4, 3);*/
+  return nullptr;
 }
 
 IndexedVertexArray* GraphicsUtils::createSimpleQuad() {

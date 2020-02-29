@@ -34,8 +34,6 @@ NoiseGenerator::NoiseGenerator(std::size_t mapSize, int xOffset, int yOffset)
   finalTerrain.SetBounds (0.0, 1000.0);
   finalTerrain.SetEdgeFalloff (0.125);
 
-  printf("offsets: %d %d\n", _xOffset, _yOffset);
-
   utils::NoiseMapBuilderPlane heightMapBuilder;
   heightMapBuilder.SetSourceModule (finalTerrain);
   heightMapBuilder.SetDestNoiseMap (_heightMap);

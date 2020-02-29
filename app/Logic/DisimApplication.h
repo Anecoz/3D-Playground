@@ -19,7 +19,7 @@ public:
   void update(double delta) override;
 
 private:
-  //DrawableCube _cube;
+  DrawableCube _cube;
   std::vector<Grid*> _currentGrids;
   Camera _camera;
   TerrainCollisionHandler _terrainCollisionHandler;
