@@ -23,8 +23,8 @@ Grid::Grid()
     "/home/christoph/dev/rpg/app/Graphics/standard.tese",
     "/home/christoph/dev/rpg/app/Graphics/standard.frag")*/
   , _shader(
-    "/home/christoph/dev/rpg/app/Graphics/grid.vert",
-    "/home/christoph/dev/rpg/app/Graphics/grid.frag")
+    "/home/christoph/dev/3D-Playground/app/Graphics/grid.vert",
+    "/home/christoph/dev/3D-Playground/app/Graphics/grid.frag")
 {
   createMesh();
 }

@@ -16,7 +16,7 @@ void main() {
   vec3 ambient = ambientStrength * lightColor;
 
   // Diffuse
-  float diff = max(dot(fragNormal, lightDir), 0.0);
+  float diff = max(dot(fragNormal, -lightDir), 0.0);
   vec3 diffuse = diff * lightColor;
 
   // Specular

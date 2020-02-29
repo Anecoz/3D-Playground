@@ -8,7 +8,7 @@
 #include <glm/gtx/transform.hpp>
 
 DrawableCube::DrawableCube()
-  : _shader("/home/christoph/dev/rpg/app/Graphics/cube.vert", "/home/christoph/dev/rpg/app/Graphics/cube.frag")
+  : _shader("/home/christoph/dev/3D-Playground/app/Graphics/cube.vert", "/home/christoph/dev/3D-Playground/app/Graphics/cube.frag")
   , _cubeMesh(GraphicsUtils::createUnitCube())
   , _modelMatrix(glm::scale(glm::vec3(1.0)))
 {
