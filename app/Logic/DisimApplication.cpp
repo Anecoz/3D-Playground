@@ -8,7 +8,8 @@
 #include <iostream>
 
 DisimApplication::DisimApplication()
-  : _camera(glm::vec3(100.0, 5.0, 100.0))
+  : _instancedModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_tree.obj")
+  , _camera(glm::vec3(100.0, 5.0, 100.0))
   , _gridGenerator(8)
 {
   //std::cout << "Setting wireframe" << std::endl;
@@ -17,10 +18,11 @@ DisimApplication::DisimApplication()
 
 void DisimApplication::render()
 {
-  _cube.draw(_camera);
-  /*for (auto grid: _currentGrids) {
+  //_cube.draw(_camera);
+  for (auto grid: _currentGrids) {
     grid->draw(_camera);
-  }*/
+  }
+  _instancedModel.draw(_camera);
 }
 
 void DisimApplication::update(double delta)

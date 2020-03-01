@@ -4,6 +4,7 @@
 #include "TerrainCollisionHandler.h"
 #include "GridGenerator.h"
 #include "../Graphics/DrawableCube.h"
+#include "../Graphics/InstancedModel.h"
 #include "../Graphics/Camera.h"
 #include "../Graphics/Grid.h"
 
@@ -20,6 +21,7 @@ public:
 
 private:
   DrawableCube _cube;
+  InstancedModel _instancedModel;
   std::vector<Grid*> _currentGrids;
   Camera _camera;
   TerrainCollisionHandler _terrainCollisionHandler;

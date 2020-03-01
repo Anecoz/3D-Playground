@@ -149,7 +149,7 @@ IndexedVertexArray* GraphicsUtils::createGrid(unsigned sizeX, unsigned sizeY)
 
 IndexedVertexArray* GraphicsUtils::loadObj(const std::string& filePath)
 {
-  std::vector<glm::vec3> verts;
+  /*std::vector<glm::vec3> verts;
   std::vector<glm::vec3> normals;
   std::vector<unsigned int> indices;
 
@@ -162,7 +162,7 @@ IndexedVertexArray* GraphicsUtils::loadObj(const std::string& filePath)
       vertArr[i * 3 + 2] = verts[i].z;
     }
     return new IndexedVertexArray(vertArr, &indices[0], verts.size(), indices.size(), 3);
-  }
+  }*/
   return nullptr;
 }
 

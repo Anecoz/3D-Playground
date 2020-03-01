@@ -47,6 +47,9 @@ void main() {
   vec3 col = calcColor(fragPosition.y, angle);
 
   vec3 result = (ambient + diffuse /*+ specular*/) * col;
+
+  float gamma = 1.8;
+  result = pow(result, vec3(1.0/gamma));
+
   outColor = vec4(result, 1.0);
-  //outColor = vec4(fragNormal, 1.0);
 }

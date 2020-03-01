@@ -1,75 +1,68 @@
 #include "OBJLoader.h"
+
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "../tiny_obj_loader.h"
+
+#include <stdio.h>
 #include <iostream>
 #include <algorithm>
 
-OBJLoader::OBJLoader()
+bool OBJLoader::loadFromFile(const std::string& objPath, const std::string& mtlDir, OBJData& outData)
 {
-}
+	tinyobj::attrib_t attrib;
+  std::vector<tinyobj::shape_t> shapes;
+  std::vector<tinyobj::material_t> materials;
+  std::string warn, err;
 
-bool OBJLoader::loadFromFile(const std::string& path, std::vector<glm::vec3>& outVerts, std::vector<unsigned>& outIndices, std::vector<glm::vec3>& outNormals) {
-	FILE * file = fopen(path.c_str(), "r");
-	if (file == NULL) {
-		std::cerr << "Impossible to open the file " << path << "!" << std::endl;
-		return false;
-	}
+  printf("OBJ: Loading OBJ model from %s\n", objPath.c_str());
+  tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, objPath.c_str(), mtlDir.c_str());
 
-	std::vector<glm::vec3> tmpVertices;	
-	std::vector<glm::vec3> tmpNormals;
-	std::vector<unsigned> vertexIndices;
-	//std::vector<unsigned> normalIndices;
+  if (!warn.empty()) {
+    printf("OBJ: Warning: %s\n", warn.c_str());
+  }
+  if (!err.empty()) {
+    printf("OBJ: Error: %s\n", err.c_str());
+  }
 
-	while (1) {
+  if (shapes.empty()) {
+    printf("OBJ: No shapes loaded, doing nothing\n");
+    return false;
+  }
 
-		char lineHeader[128];
-		// read the first word of the line
-		int res = fscanf(file, "%s", lineHeader);        
-		if (res == EOF)
-			break; // EOF = End Of File. Quit the loop.
+  printf("OBJ: Loading %zu shapes\n", shapes.size());
 
-		if (strcmp(lineHeader, "v") == 0) {
-			glm::vec3 vertex;
-			fscanf(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
-			tmpVertices.push_back(vertex);
-		}
-		else if (strcmp(lineHeader, "vt") == 0) {
-		}
-		/*else if (strcmp(lineHeader, "vn") == 0) {
-			glm::vec3 normal;
-			fscanf(file, "%f %f %f\n", &normal.x, &normal.y, &normal.z);
-			tmpNormals.push_back(normal);
-		}*/
-		else if (strcmp(lineHeader, "f") == 0) {
-			unsigned int vertexIndex[3], normalIndex[3];
-			int matches = fscanf(file, "%d//%d %d//%d %d//%d\n", &vertexIndex[0], &normalIndex[0], &vertexIndex[1], &normalIndex[1], &vertexIndex[2], &normalIndex[2]);
-			if (matches != 6) {
-				printf("File can't be read by our simple parser : ( Try exporting with other options\n");
-				return false;
-			}
-			vertexIndices.push_back(vertexIndex[0] - 1);
-			vertexIndices.push_back(vertexIndex[1] - 1);
-			vertexIndices.push_back(vertexIndex[2] - 1);
-			//normalIndices.push_back(normalIndex[0] - 1);
-			//normalIndices.push_back(normalIndex[1] - 1);
-			//normalIndices.push_back(normalIndex[2] - 1);
-		}
-	}
-	
-	//tmpNormals = fixNormals(vertexIndices, normalIndices, tmpNormals, tmpVertices);
-	outVerts = tmpVertices;
-	outIndices = vertexIndices;
-	outNormals = tmpNormals;
-	return true;
-}
+  std::vector<int> indices;
+  std::vector<float> normals;
+  std::vector<float> colors;
+  colors.resize(attrib.vertices.size());
+  normals.resize(attrib.vertices.size());
+  for (int shape = 0; shape < shapes.size(); ++shape) {
+    for (int i = 0; i < shapes[shape].mesh.indices.size(); ++i) {
+      tinyobj::index_t idx = shapes[shape].mesh.indices[i];
+      indices.emplace_back(idx.vertex_index);
 
-std::vector<glm::vec3> OBJLoader::fixNormals(const std::vector<unsigned>& vertIndices, const std::vector<unsigned>& normIndices, const std::vector<glm::vec3>& normals, const std::vector<glm::vec3>& verts) {
-	// Need new normal array with same size as vertices...
-	std::vector<glm::vec3> newNormals;
+      normals[3 * idx.vertex_index + 0] = attrib.normals[3 * idx.normal_index + 0];
+      normals[3 * idx.vertex_index + 1] = attrib.normals[3 * idx.normal_index + 1];
+      normals[3 * idx.vertex_index + 2] = attrib.normals[3 * idx.normal_index + 2];
 
-	for (unsigned i = 0; i < verts.size(); i++) {
-		// Find index of VERT INDEX ARRAY of this vert (first occurence is sufficient)
-		int index = std::find(vertIndices.begin(), vertIndices.end(), i) - vertIndices.begin();
-		newNormals.push_back(normals[normIndices[index]]);
-	}
+      if (!shapes[shape].mesh.material_ids.empty()) {
+        int materialId = shapes[shape].mesh.material_ids[i/3];    
 
-	return newNormals;
+        colors[3 * idx.vertex_index + 0] = materials[materialId].diffuse[0];
+        colors[3 * idx.vertex_index + 1] = materials[materialId].diffuse[1];
+        colors[3 * idx.vertex_index + 2] = materials[materialId].diffuse[2];
+      }
+      else {
+        colors[3 * idx.vertex_index + 0] = 1.0;
+        colors[3 * idx.vertex_index + 1] = 1.0;
+        colors[3 * idx.vertex_index + 2] = 1.0;
+      }
+    }
+  }
+
+  outData._vertices = std::move(attrib.vertices);
+  outData._normals = std::move(normals);
+  outData._colors = std::move(colors);
+  outData._indices = std::move(indices);
+  return true;
 }

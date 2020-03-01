@@ -1,24 +1,25 @@
 #pragma once
 
-#include "Lowlevel/IndexedVertexArray.h"
 #include "Lowlevel/Shader.h"
 
 #include <glm/glm.hpp>
 
 #include <memory>
-#include <vector>
+#include <string>
 
 class Camera;
+class IndexedVertexArray;
 
-class DrawableCube
+class InstancedModel
 {
 public:
-  DrawableCube();
+  InstancedModel(const std::string& objPath);
+  ~InstancedModel();
 
   void draw(const Camera& camera);
-private:
-  std::vector<std::unique_ptr<IndexedVertexArray>> _cubeMesh;
-  Shader _shader;
 
+private:
+  Shader _shader;
+  std::unique_ptr<IndexedVertexArray> _mesh;
   glm::mat4 _modelMatrix;
 };

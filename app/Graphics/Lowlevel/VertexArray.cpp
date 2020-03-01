@@ -1,7 +1,8 @@
 #include "VertexArray.h"
 #include "Shader.h"
 
-VertexArray::VertexArray(GLfloat* vertices, GLint count, GLint floatPerVertex) {
+VertexArray::VertexArray(GLfloat* vertices, GLint count, GLint floatPerVertex)
+{
   _tbo = 0;
   _cbo = 0;
   _nbo = 0;
@@ -78,7 +79,8 @@ VertexArray::VertexArray(GLfloat* vertices, GLint numVerts, GLfloat* normals, GL
 	glBindVertexArray(0);
 }
 
-/*VertexArray::VertexArray(GLfloat* texCoords, GLfloat* vertices, GLint numVerts, GLint numTex, GLint floatPerVertex) {
+VertexArray::VertexArray(GLfloat* texCoords, GLfloat* vertices, GLint numVerts, GLint numTex, GLint floatPerVertex)
+{
   _tbo = 0;
   _cbo = 0;
   _nbo = 0;
@@ -101,23 +103,27 @@ VertexArray::VertexArray(GLfloat* vertices, GLint numVerts, GLfloat* normals, GL
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
-}*/
+}
 
-void VertexArray::bind() {
+void VertexArray::bind()
+{
 	glBindVertexArray(_vao);
 }
 
-void VertexArray::unbind() {
+void VertexArray::unbind()
+{
 	glBindVertexArray(0);
 }
 
-void VertexArray::draw() {
+void VertexArray::draw()
+{
 	bind();
 	glDrawArrays(GL_TRIANGLES, 0, _count);
 	unbind();
 }
 
-VertexArray::~VertexArray() {
+VertexArray::~VertexArray()
+{
 	glDeleteVertexArrays(1, &_vao);
 	glDeleteBuffers(1, &_vbo);
 	if (_tbo != 0)

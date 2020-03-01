@@ -118,7 +118,7 @@ void Application::initWindowHandle()
 		exit(-3);
 	}
 
-	glClearColor(0.2, 0.2, 0.5, 0.0);
+	glClearColor(0.7, 0.7, 0.7, 0.0);
 	glEnable(GL_DEPTH_TEST);
   std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
   std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
