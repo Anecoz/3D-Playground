@@ -43,9 +43,11 @@ IndexedVertexArray::IndexedVertexArray(GLfloat* vertices, GLuint* indices, GLflo
   if (instanced) {
     glGenBuffers(1, &_instanceBo);
     glBindBuffer(GL_ARRAY_BUFFER, _instanceBo);
-    glVertexAttribPointer(Shader::POSOFFSET_ATTRIB_LOC, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(Shader::POSOFFSET_ATTRIB_LOC);
-    glVertexAttribDivisor(Shader::POSOFFSET_ATTRIB_LOC, 1);  
+    for (int i = 0; i < 4; ++i) {
+      glVertexAttribPointer(Shader::INSTANCE_MODEL_ATTRIB_LOC_0 + i, 4, GL_FLOAT, GL_FALSE, 4 * 4 * sizeof(float), (void*)(i * 4 * sizeof(float)));
+      glEnableVertexAttribArray(Shader::INSTANCE_MODEL_ATTRIB_LOC_0 + i);
+      glVertexAttribDivisor(Shader::INSTANCE_MODEL_ATTRIB_LOC_0 + i, 1);
+    }
   }
 	unbind();
 }
@@ -71,13 +73,13 @@ IndexedVertexArray::~IndexedVertexArray()
   }
 }
 
-void IndexedVertexArray::updateInstancePosOffsets(const std::vector<float>& posOffsets)
+void IndexedVertexArray::updateInstanceMatrices(const std::vector<glm::mat4>& modelMatrices)
 {
   if (_instanceBo == 0) return;
 
   bind();
   glBindBuffer(GL_ARRAY_BUFFER, _instanceBo);
-  glBufferData(GL_ARRAY_BUFFER, posOffsets.size() * sizeof(float), &posOffsets[0], GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, modelMatrices.size() * sizeof(float) * 16, &modelMatrices[0], GL_DYNAMIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   unbind();
 }

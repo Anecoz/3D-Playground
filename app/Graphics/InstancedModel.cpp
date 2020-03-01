@@ -8,13 +8,16 @@
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/transform.hpp>
+#include <glm/gtx/euler_angles.hpp>
 
 InstancedModel::InstancedModel(const std::string& objPath)
-  : _shader(
+  : _numInstances(1)
+  ,  _shader(
       "/home/christoph/dev/3D-Playground/app/Graphics/instancedmodel.vert",
+      "/home/christoph/dev/3D-Playground/app/Graphics/instancedmodel.geom",
       "/home/christoph/dev/3D-Playground/app/Graphics/instancedmodel.frag")
   , _mesh(nullptr)
-  , _modelMatrix(glm::scale(glm::vec3(0.1)))
+  , _modelMatrix(glm::scale(glm::vec3(1.0)))
 {
   // Find directory
   std::string directory = objPath;
@@ -45,6 +48,30 @@ InstancedModel::~InstancedModel()
   _mesh = nullptr;
 }
 
+void InstancedModel::setInstanceMatrices(std::vector<glm::mat4>&& matrices)
+{
+  if (!_mesh) {
+    printf("InstancedModel: No mesh, not updating matrices\n");
+    return;
+  }
+
+  _mesh->updateInstanceMatrices(std::move(matrices));
+}
+
+void InstancedModel::setNumInstances(std::size_t numInstances)
+{
+  if (!_mesh) {
+    printf("InstancedModel: No mesh, not updating num instances\n");
+    return;
+  }
+  _numInstances = numInstances;
+}
+
+void InstancedModel::setRotation(float xDeg, float yDeg, float zDeg)
+{
+  _modelMatrix = glm::yawPitchRoll(yDeg, xDeg, zDeg);
+}
+
 void InstancedModel::draw(const Camera& camera)
 {
   if (!_mesh) {
@@ -52,27 +79,13 @@ void InstancedModel::draw(const Camera& camera)
     return;
   }
 
-  // Test drawing 10000 models. Calculate offsets in x and z dir.
-  std::vector<float> offsets;
-  offsets.resize(10000 * 3);
-  for (int x = 0; x < 100; ++x) {
-    for (int z = 0; z < 100; ++z) {
-      offsets[3 * 100 * z + 3 * x + 0] = 100.0f * (float)x;
-      offsets[3 * 100 * z + 3 * x + 1] = 0.0f;
-      offsets[3 * 100 * z + 3 * x + 2] = 100.0f * (float)z;
-    }
-  }
-
-  _mesh->updateInstancePosOffsets(offsets);
-
   _shader.bind();
   _shader.uploadMatrix(_modelMatrix, "modelMatrix");
   _shader.uploadMatrix(camera.getCamMatrix(), "camMatrix");
   _shader.uploadMatrix(camera.getProjection(), "projMatrix");
   _shader.uploadVec(camera.getPosition(), "cameraPos");
 
-  // draw instanced here
-  _mesh->drawInstanced(10000);
+  _mesh->drawInstanced(_numInstances);
 
   _shader.unbind();
 }

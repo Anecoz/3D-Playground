@@ -21,6 +21,7 @@ public:
 
   bool heightAt(double x, double z, double* heightOut) const;
   const glm::vec3& getPosition();
+  std::size_t getSize() const;
 
 private:
   void createMesh();

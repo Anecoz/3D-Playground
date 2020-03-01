@@ -1,6 +1,8 @@
 #pragma once
 
 #include <GL/glew.h>
+#include <glm/glm.hpp>
+
 #include "VertexArray.h"
 
 #include <vector>
@@ -24,7 +26,7 @@ public:
 
 	virtual ~IndexedVertexArray();
 
-  void updateInstancePosOffsets(const std::vector<float>& posOffsets);
+  void updateInstanceMatrices(const std::vector<glm::mat4>& modelMatrices);
 	
 	void draw() override;
   void drawTesselated();

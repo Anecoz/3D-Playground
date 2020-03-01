@@ -4,8 +4,7 @@ layout (location = 0) out vec4 outColor;
 
 uniform vec3 cameraPos;
 
-in vec3 fragNormal;
-flat in vec3 fragColour;
+flat in vec3 fragNormal;
 in vec3 fragPosition;
 
 #define M_PI 3.1415926535897932384626433832795
@@ -24,29 +23,32 @@ vec3 calcColor(float height, float angle) {
 
 void main() {
   vec3 normal = normalize(fragNormal);
-  vec3 lightColor = vec3(1.0, 1.0, 1.0);
-  vec3 lightDir = normalize(vec3(0.5, 0.5, 0.0));
-
-  // Ambient
-  float ambientStrength = 0.1;
-  vec3 ambient = ambientStrength * lightColor;
-
-  // Diffuse
-  float diff = max(dot(normal, lightDir), 0.0);
-  vec3 diffuse = diff * lightColor;
-
-  // Specular
-  float specularStrength = 0.5;
-  vec3 viewDir = normalize(cameraPos - fragPosition);
-  vec3 reflectDir = reflect(-lightDir, normal);
-  float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-  vec3 specular = specularStrength * spec * lightColor;
+  vec3 lightDir = normalize(vec3(0.58, 0.58, 0.58));
+  //vec3 lightDir = normalize(cameraPos - fragPosition);
 
   // Calculate angle of normal
   float angle = acos(dot(normal, vec3(0, 1, 0)));
-  vec3 col = calcColor(fragPosition.y, angle);
+  vec3 fragColor = calcColor(fragPosition.y, angle);
 
-  vec3 result = (ambient + diffuse /*+ specular*/) * col;
+  vec3 ambientColor = vec3(1.0, 1.0, 1.0);
+  vec3 diffuseColor = fragColor;
+  vec3 specColor = vec3(0.5, 0.5, 0.5);
+
+  // Ambient
+  float ambientStrength = 0.1;
+  vec3 ambient = ambientStrength * ambientColor;
+
+  // Diffuse
+  float diff = max(dot(normal, lightDir), 0.0);
+  vec3 diffuse = diff * diffuseColor;
+
+  // Specular
+  vec3 viewDir = normalize(cameraPos - fragPosition);
+  vec3 reflectDir = reflect(-lightDir, normal);  
+  float spec = pow(max(dot(viewDir, reflectDir), 0.0), 324);
+  vec3 specular = 0.1 * spec * specColor;
+
+  vec3 result = (ambient + diffuse + specular);
 
   float gamma = 1.8;
   result = pow(result, vec3(1.0/gamma));

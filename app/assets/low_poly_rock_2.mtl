@@ -1,10 +1,10 @@
-# Blender MTL File: 'Small Rock2.blend'
+# Blender MTL File: 'low_poly_rock_2.blend'
 # Material Count: 1
 
 newmtl Stone
-Ns 96.078431
+Ns 96.078443
 Ka 1.000000 1.000000 1.000000
-Kd 0.064009 0.064009 0.064009
+Kd 0.259799 0.259799 0.259799
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000

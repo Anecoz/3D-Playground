@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../Graphics/Grid.h"
-#include "NoiseGenerator.h"
+#include "TerrainNoiseGenerator.h"
 
 #include <glm/glm.hpp>
 

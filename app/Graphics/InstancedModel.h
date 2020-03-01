@@ -4,6 +4,7 @@
 
 #include <glm/glm.hpp>
 
+#include <cstddef>
 #include <memory>
 #include <string>
 
@@ -18,7 +19,12 @@ public:
 
   void draw(const Camera& camera);
 
+  void setInstanceMatrices(std::vector<glm::mat4>&& offsets);
+  void setNumInstances(std::size_t numInstances);
+  void setRotation(float xDeg, float yDeg, float zDeg);
+
 private:
+  std::size_t _numInstances;
   Shader _shader;
   std::unique_ptr<IndexedVertexArray> _mesh;
   glm::mat4 _modelMatrix;

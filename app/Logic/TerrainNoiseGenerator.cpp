@@ -1,4 +1,4 @@
-#include "NoiseGenerator.h"
+#include "TerrainNoiseGenerator.h"
 
 #include <stdio.h>
 

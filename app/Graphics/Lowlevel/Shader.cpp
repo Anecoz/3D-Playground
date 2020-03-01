@@ -10,6 +10,10 @@ Shader::Shader(const std::string& vertPath, const std::string& fragPath) {
 	id = ShaderUtils::loadShaders(vertPath.c_str(), fragPath.c_str());
 }
 
+Shader::Shader(const std::string& vertPath, const std::string& geomPath, const std::string& fragPath) {
+	id = ShaderUtils::loadShaders(vertPath.c_str(), geomPath.c_str(), fragPath.c_str());
+}
+
 Shader::Shader(const std::string& vertPath, const std::string& tescPath, const std::string& tesePath, const std::string& fragPath) {
   id = ShaderUtils::loadShaders(vertPath.c_str(), tescPath.c_str(), tesePath.c_str(), fragPath.c_str());
 }

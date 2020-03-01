@@ -3,7 +3,7 @@
 layout (location = 0) out vec4 outColor;
 
 flat in vec3 fragNormal;
-in vec3 fragColor;
+flat in vec3 fragColor;
 in vec3 fragPosition;
 
 uniform vec3 cameraPos;
@@ -14,7 +14,8 @@ void main() {
   vec3 specColor = vec3(0.5, 0.5, 0.5);
 
   vec3 normal = normalize(fragNormal);
-  vec3 lightDir = normalize(cameraPos - fragPosition);
+  //vec3 lightDir = normalize(cameraPos - fragPosition);
+  vec3 lightDir = normalize(vec3(0.58, 0.58, 0.58));
 
   // Ambient
   float ambientStrength = 0.1;

@@ -26,6 +26,7 @@ Grid::Grid()
     "/home/christoph/dev/rpg/app/Graphics/standard.frag")*/
   , _shader(
     "/home/christoph/dev/3D-Playground/app/Graphics/grid.vert",
+    "/home/christoph/dev/3D-Playground/app/Graphics/grid.geom",
     "/home/christoph/dev/3D-Playground/app/Graphics/grid.frag")
 {
   createMesh();
@@ -41,6 +42,7 @@ Grid::Grid(float* verts, float* normals, unsigned* indices, std::size_t size, co
   , _mesh(nullptr)
   , _shader(
     "/home/christoph/dev/3D-Playground/app/Graphics/grid.vert",
+    "/home/christoph/dev/3D-Playground/app/Graphics/grid.geom",
     "/home/christoph/dev/3D-Playground/app/Graphics/grid.frag")
 {
   unsigned numVerts = (_size + 1) * (_size + 1) * 3;
@@ -142,6 +144,11 @@ bool Grid::heightAt(double x, double z, double* heightOut) const
 const glm::vec3& Grid::getPosition()
 {
   return _position;
+}
+
+std::size_t Grid::getSize() const
+{
+  return _size;
 }
 
 void Grid::draw(const Camera& camera)

@@ -11,6 +11,7 @@ class Shader
 public:
 	Shader();
 	Shader(const std::string& vertPath, const std::string& fragPath);
+  Shader(const std::string& vertPath, const std::string& geomPath, const std::string& fragPath);
   Shader(const std::string& vertPath, const std::string& tescPath, const std::string& tesePath, const std::string& fragPath);
 	~Shader();
 
@@ -18,7 +19,10 @@ public:
 	static const GLint TEX_ATTRIB_LOC = 1;
   static const GLint NORMAL_ATTRIB_LOC = 2;
   static const GLint COLOR_ATTRIB_LOC = 3;
-  static const GLint POSOFFSET_ATTRIB_LOC = 4;
+  static const GLint INSTANCE_MODEL_ATTRIB_LOC_0 = 4;
+  static const GLint INSTANCE_MODEL_ATTRIB_LOC_1 = 5;
+  static const GLint INSTANCE_MODEL_ATTRIB_LOC_2 = 6;
+  static const GLint INSTANCE_MODEL_ATTRIB_LOC_3 = 7;
 
 	GLuint getId();
 	void bind();
