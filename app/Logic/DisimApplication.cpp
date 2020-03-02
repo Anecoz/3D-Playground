@@ -38,12 +38,12 @@ void DisimApplication::update(double delta)
   _gridGenerator.update(_camera, delta, activeGrids);
 
   std::vector<InstancedModel*> activeModels;
-  _decorationGenerator.update(_camera, activeGrids, activeModels);
+  //_decorationGenerator.update(_camera, activeGrids, activeModels);
 
   _currentGrids = std::move(activeGrids);
   _currentModels = std::move(activeModels);
 
-  for (auto grid: _currentGrids) {
+  /*for (auto grid: _currentGrids) {
     _terrainCollisionHandler.update(*grid, _camera, delta);
-  }
+  }*/
 }

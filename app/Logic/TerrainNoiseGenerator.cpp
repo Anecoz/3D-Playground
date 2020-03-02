@@ -48,24 +48,34 @@ NoiseGenerator::NoiseGenerator(std::size_t mapSize, int xOffset, int yOffset)
   flatTerrain.SetBias (-0.25);
 
   module::RidgedMulti river;
-  river.SetFrequency(0.1);
+  river.SetFrequency(0.05);
   river.SetOctaveCount(1);
   river.SetLacunarity(3.0);
 
+  module::ScaleBias preInvertScaleRiver;
+  preInvertScaleRiver.SetSourceModule(0, river);
+  preInvertScaleRiver.SetScale(4.0);
+
+  module::Const val;
+  val.SetConstValue(3.0);
+
+  module::Power riverPower;
+  riverPower.SetSourceModule(0, preInvertScaleRiver);
+  riverPower.SetSourceModule(1, val);
+
   module::Invert riverInvert;
-  riverInvert.SetSourceModule(0, river);
+  riverInvert.SetSourceModule(0, riverPower);
   
   module::ScaleBias riverBias;
   riverBias.SetSourceModule(0, riverInvert);
-  riverBias.SetScale(1.0);
-  riverBias.SetBias(-0.5);
+  riverBias.SetScale(1.5);
 
   module::Select riverMask;
   riverMask.SetSourceModule (0, flatTerrain);
   riverMask.SetSourceModule (1, riverBias);
   riverMask.SetControlModule (riverBias);
-  riverMask.SetBounds (-1.0, -0.5);
-  riverMask.SetEdgeFalloff (1.0);
+  riverMask.SetBounds (-10.0, -0.5);
+  riverMask.SetEdgeFalloff (0.8);
 
   module::Perlin terrainType;
   terrainType.SetFrequency (0.5);
@@ -82,8 +92,8 @@ NoiseGenerator::NoiseGenerator(std::size_t mapSize, int xOffset, int yOffset)
   finalTerrain.SetSourceModule(0, finalDryTerrain);
   finalTerrain.SetSourceModule(1, riverMask);
   finalTerrain.SetControlModule(riverMask);
-  finalTerrain.SetBounds(-1.0, -0.5);
-  finalTerrain.SetEdgeFalloff(0.25);
+  finalTerrain.SetBounds(-10.0, -0.5);
+  finalTerrain.SetEdgeFalloff(0.8);
 
   utils::NoiseMapBuilderPlane heightMapBuilder;
   heightMapBuilder.SetSourceModule (finalTerrain);
