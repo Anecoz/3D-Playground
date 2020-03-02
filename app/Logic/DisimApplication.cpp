@@ -9,7 +9,7 @@
 
 DisimApplication::DisimApplication()
   //: _instancedModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_tree.obj")
-  : _camera(glm::vec3(100.0, 5.0, 100.0))
+  : _camera(glm::vec3(10000.0, 500.0, 10000.0))
   , _gridGenerator(8)
 {
   //std::cout << "Setting wireframe" << std::endl;
@@ -23,7 +23,9 @@ void DisimApplication::render()
     grid->draw(_camera);
   }
   for (auto model: _currentModels) {
-    model->draw(_camera);
+    if (glm::distance(model->getCenter(), _camera.getPosition()) < 500.0f) {
+      model->draw(_camera);
+    }
   }
   //_instancedModel.draw(_camera);
 }
@@ -41,7 +43,7 @@ void DisimApplication::update(double delta)
   _currentGrids = std::move(activeGrids);
   _currentModels = std::move(activeModels);
 
-  /*for (auto grid: _currentGrids) {
+  for (auto grid: _currentGrids) {
     _terrainCollisionHandler.update(*grid, _camera, delta);
-  }*/
+  }
 }

@@ -33,6 +33,9 @@ void DecorationGenerator::update(const Camera& camera, const std::vector<Grid*>&
     std::vector<glm::mat4> grassMatrices;
     std::vector<glm::mat4> rockMatrices;
     std::vector<glm::mat4> treeMatrices;
+    glm::vec3 grassCenter;
+    glm::vec3 rockCenter;
+    glm::vec3 treeCenter;
     for (int x = 0; x < grid->getSize(); ++x/*x = x + 16*/) {
       for (int z = 0; z < grid->getSize(); ++z/*z = z + 16*/) {
         double dx = (double)x + grid->getPosition().x;
@@ -63,18 +66,22 @@ void DecorationGenerator::update(const Camera& camera, const std::vector<Grid*>&
         double xRot = generator.randomRotation(-10, 10);
         double yRot = generator.randomRotation(0, 360);
         double zRot = generator.randomRotation(-10, 10);
-        glm::mat4 translation = glm::translate(glm::vec3((float)dx, (float)height, (float)dz));
+        glm::vec3 pos((float)dx, (float)height, (float)dz);
+        glm::mat4 translation = glm::translate(pos);
         glm::mat4 rotation = glm::yawPitchRoll(glm::radians(yRot), glm::radians(xRot), glm::radians(zRot));
 
         glm::mat4 matrix = translation * rotation;
         if (type == DecorationType::Grass) {          
           grassMatrices.emplace_back(matrix);
+          grassCenter += pos;
         }
         else if (type == DecorationType::Rock) {
           rockMatrices.emplace_back(matrix);
+          rockCenter += pos;
         }
         else if (type == DecorationType::Tree) {
           treeMatrices.emplace_back(matrix);
+          treeCenter += pos;
         }
       }
     }
@@ -83,18 +90,24 @@ void DecorationGenerator::update(const Camera& camera, const std::vector<Grid*>&
     if (!grassMatrices.empty()) {
       InstancedModel* model = new InstancedModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_grass.obj");
       model->setNumInstances(grassMatrices.size() / 3);
+      grassCenter /= grassMatrices.size();
+      model->setCenter(grassCenter);
       model->setInstanceMatrices(std::move(grassMatrices));
       models.emplace_back(model);
     }
     if (!rockMatrices.empty()) {
       InstancedModel* model = new InstancedModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_rock.obj");
       model->setNumInstances(rockMatrices.size() / 3);
+      rockCenter /= rockMatrices.size();
+      model->setCenter(rockCenter);
       model->setInstanceMatrices(std::move(rockMatrices));
       models.emplace_back(model);
     }
     if (!treeMatrices.empty()) {
       InstancedModel* model = new InstancedModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_tree.obj");
       model->setNumInstances(treeMatrices.size() / 3);
+      treeCenter /= treeMatrices.size();
+      model->setCenter(treeCenter);
       model->setInstanceMatrices(std::move(treeMatrices));
       model->setRotation(0.0f, 90.0f, 0.0f);
       models.emplace_back(model);

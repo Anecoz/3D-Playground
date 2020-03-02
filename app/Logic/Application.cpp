@@ -127,5 +127,5 @@ void Application::initWindowHandle()
   glGetIntegerv(GL_MAX_PATCH_VERTICES, &maxPatchVertices);
   std::cout << "Max supported patch vertices: " << std::to_string(maxPatchVertices) << std::endl;
   glPatchParameteri(GL_PATCH_VERTICES, 3);
-  glDisable(GL_CULL_FACE);
+  glEnable(GL_CULL_FACE);
 }

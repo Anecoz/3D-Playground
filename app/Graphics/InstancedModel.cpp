@@ -11,7 +11,8 @@
 #include <glm/gtx/euler_angles.hpp>
 
 InstancedModel::InstancedModel(const std::string& objPath)
-  : _numInstances(1)
+  :  _center(0.0, 0.0, 0.0)
+  ,  _numInstances(1)
   ,  _shader(
       "/home/christoph/dev/3D-Playground/app/Graphics/instancedmodel.vert",
       "/home/christoph/dev/3D-Playground/app/Graphics/instancedmodel.geom",
@@ -70,6 +71,16 @@ void InstancedModel::setNumInstances(std::size_t numInstances)
 void InstancedModel::setRotation(float xDeg, float yDeg, float zDeg)
 {
   _modelMatrix = glm::yawPitchRoll(yDeg, xDeg, zDeg);
+}
+
+void InstancedModel::setCenter(const glm::vec3& center)
+{
+  _center = center;
+}
+
+glm::vec3 InstancedModel::getCenter()
+{
+  return _center;
 }
 
 void InstancedModel::draw(const Camera& camera)

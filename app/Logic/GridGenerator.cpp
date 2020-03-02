@@ -14,7 +14,6 @@
 
 GridGenerator::GridGenerator()
   : _numWorkers(4)
-  //, _noiseGenerator(_gridSize)
 {
   _workers.reserve(_numWorkers);
   for (unsigned i = 0; i < _numWorkers; ++i) {
@@ -24,7 +23,6 @@ GridGenerator::GridGenerator()
 
 GridGenerator::GridGenerator(std::size_t numWorkerThreads)
   : _numWorkers(numWorkerThreads)
-  //, _noiseGenerator(_gridSize)
 {
   _workers.reserve(_numWorkers);
   for (unsigned i = 0; i < _numWorkers; ++i) {
@@ -128,13 +126,6 @@ void GridGenerator::update(const Camera& camera, double delta, std::vector<Grid*
 
 GridGenerator::GridData* GridGenerator::Worker::generateData(std::size_t size, const glm::vec3& posOffset)
 {
-  //const siv::PerlinNoise perlin(129832);
-  //const double frequency = 2.0;
-  //const double amplitude = 74.0;
-  //const int octaves = 4;
-  //const double fx = (double)size / frequency;
-  //const double fy = (double)size / frequency;
-
   NoiseGenerator generator(size, (int)posOffset.x, (int)posOffset.z);
 
   unsigned numVerts = (size + 1) * (size + 1) * 3;
@@ -152,7 +143,6 @@ GridGenerator::GridData* GridGenerator::Worker::generateData(std::size_t size, c
     for (unsigned x = 0; x <= size; ++x) {
       double dx = static_cast<double>(x);
       double dy = static_cast<double>(y);
-      //double height = amplitude * (GLfloat)perlin.accumulatedOctaveNoise2D_0_1(dx/fx, dy/fy, octaves);
       double height = generator.getAt(x, y);
 
       unsigned offset = 3 * (y * (size + 1));
@@ -162,8 +152,6 @@ GridGenerator::GridData* GridGenerator::Worker::generateData(std::size_t size, c
 
       double offsetX = dx + 0.01;
       double offsetY = dy + 0.01;
-      //double dHeightX = amplitude * (GLfloat)perlin.accumulatedOctaveNoise2D_0_1(offsetX/fx, dy/fy, octaves);
-      //double dHeightY = amplitude * (GLfloat)perlin.accumulatedOctaveNoise2D_0_1(dx/fx, offsetY/fy, octaves);
       double dHeightX = generator.getAt(x + 1, y);
       double dHeightY = generator.getAt(x, y + 1);
 

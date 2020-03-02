@@ -24,8 +24,6 @@ public:
   std::size_t getSize() const;
 
 private:
-  void createMesh();
-
   float* _verts;
   float* _normals;
   unsigned* _indices;
