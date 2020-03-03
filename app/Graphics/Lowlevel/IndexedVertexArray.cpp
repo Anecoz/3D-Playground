@@ -28,6 +28,30 @@ IndexedVertexArray::IndexedVertexArray(GLfloat* vertices, GLuint* indices, GLflo
 	unbind();
 }
 
+IndexedVertexArray::IndexedVertexArray(GLfloat* vertices, GLuint* indices, GLfloat* colors, GLint numColors,
+                                       GLint numVerts, GLint indicesCount, GLint floatPerVertex, bool instanced)
+  : VertexArray(vertices, colors, numVerts, numColors, floatPerVertex, true)
+  , _instanceBo(0)
+{
+  _count = indicesCount;
+
+  bind();
+  glGenBuffers(1, &_ibo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _count * sizeof(GLuint), indices, GL_STATIC_DRAW);
+
+  if (instanced) {
+    glGenBuffers(1, &_instanceBo);
+    glBindBuffer(GL_ARRAY_BUFFER, _instanceBo);
+    for (int i = 0; i < 4; ++i) {
+      glVertexAttribPointer(Shader::INSTANCE_MODEL_ATTRIB_LOC_0 + i, 4, GL_FLOAT, GL_FALSE, 4 * 4 * sizeof(float), (void*)(i * 4 * sizeof(float)));
+      glEnableVertexAttribArray(Shader::INSTANCE_MODEL_ATTRIB_LOC_0 + i);
+      glVertexAttribDivisor(Shader::INSTANCE_MODEL_ATTRIB_LOC_0 + i, 1);
+    }
+  }
+	unbind();
+}
+
 IndexedVertexArray::IndexedVertexArray(GLfloat* vertices, GLuint* indices, GLfloat* normals, GLfloat* colors, GLint numColors,
                                        GLint numNormals, GLint numVerts, GLint indicesCount, GLint floatPerVertex, bool instanced)
   : VertexArray(vertices, numVerts, normals, numNormals, colors, numColors, floatPerVertex)

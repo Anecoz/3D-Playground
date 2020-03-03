@@ -7,6 +7,7 @@
 #include <glm/gtx/transform.hpp>
 
 #include "Camera.h"
+#include "InstancedModel.h"
 #include "Lowlevel/IndexedVertexArray.h"
 #include "../Utils/GraphicsUtils.h"
 
@@ -21,9 +22,8 @@ Grid::Grid()
     "/home/christoph/dev/3D-Playground/app/Graphics/grid.frag")
 {}
 
-Grid::Grid(float* verts, float* normals, unsigned* indices, std::size_t size, const glm::vec3& position)
+Grid::Grid(float* verts, unsigned* indices, std::size_t size, const glm::vec3& position, std::vector<std::unique_ptr<InstancedModel>>&& models)
   : _verts(verts)
-  , _normals(normals)
   , _indices(indices)
   , _position(position)
   , _size(size)
@@ -33,19 +33,18 @@ Grid::Grid(float* verts, float* normals, unsigned* indices, std::size_t size, co
     "/home/christoph/dev/3D-Playground/app/Graphics/grid.vert",
     "/home/christoph/dev/3D-Playground/app/Graphics/grid.geom",
     "/home/christoph/dev/3D-Playground/app/Graphics/grid.frag")
+  , _models(std::move(models))
 {
   unsigned numVerts = (_size + 1) * (_size + 1) * 3;
-  unsigned numNormals = (_size + 1) * (_size + 1) * 3;
   unsigned numIndices = _size * _size * 6;
 
-  _mesh = std::make_unique<IndexedVertexArray>(verts, indices, normals, numNormals, numVerts, numIndices, 3);
+  _mesh = std::make_unique<IndexedVertexArray>(verts, indices, numVerts, numIndices, 3);
 }
 
 Grid::~Grid()
 {
   _mesh = nullptr;
   delete[] _verts;
-  delete[] _normals;
   delete[] _indices;
 }
 
@@ -77,6 +76,12 @@ std::size_t Grid::getSize() const
 
 void Grid::draw(const Camera& camera)
 {
+  for (auto& model: _models) {
+    if (glm::distance(camera.getPosition(), model->getCenter()) < 512.0) {
+      model->draw(camera);
+    }
+  }
+
   _modelMatrix = glm::translate(_position);
 
   _shader.bind();

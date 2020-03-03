@@ -17,6 +17,10 @@ public:
   IndexedVertexArray(GLfloat* vertices, GLuint* indices, GLfloat* normals,
                      GLint numNormals, GLint numVerts, GLint indicesCount, GLint floatPerVertex);
 
+  // Verts, colors, indices
+  IndexedVertexArray(GLfloat* vertices, GLuint* indices, GLfloat* colors, GLint numColors,
+                     GLint numVerts, GLint indicesCount, GLint floatPerVertex, bool instanced = false);
+
   // Verts, normals, colors, indices
   IndexedVertexArray(GLfloat* vertices, GLuint* indices, GLfloat* normals, GLfloat* colors, GLint numColors,
                      GLint numNormals, GLint numVerts, GLint indicesCount, GLint floatPerVertex, bool instanced = false);

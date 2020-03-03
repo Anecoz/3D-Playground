@@ -1,13 +1,18 @@
 #include "GridGenerator.h"
 
+#include "../Graphics/Camera.h"
+#include "../Graphics/InstancedModel.h"
+
 #include <algorithm>
 #include <chrono>
 #include <stdio.h>
 
 #include <GL/glew.h>
 
-#include "../Graphics/Camera.h"
-#include "../PerlinNoise.hpp"
+#include <glm/glm.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/transform.hpp>
+#include <glm/gtx/euler_angles.hpp>
 
 #include <noise/noise.h>
 #include <noise/noiseutils.h>
@@ -87,8 +92,8 @@ void GridGenerator::update(const Camera& camera, double delta, std::vector<Grid*
 
     if (worker._state == Worker::State::ResultReady) {
       auto result = worker.takeResult();
-      int gridXIdx = static_cast<int>(result->_position.x) / _gridSize;
-      int gridZIdx = static_cast<int>(result->_position.z) / _gridSize;
+      int gridXIdx = static_cast<int>(result->_gridPosition.x) / _gridSize;
+      int gridZIdx = static_cast<int>(result->_gridPosition.z) / _gridSize;
 
       // Remove from currently generating
       for (auto it = _currentlyGenerating.begin(); it != _currentlyGenerating.end(); ++it) {
@@ -98,8 +103,19 @@ void GridGenerator::update(const Camera& camera, double delta, std::vector<Grid*
         }
       }
 
+      // Create the models
+      std::vector<std::unique_ptr<InstancedModel>> models;
+      for (auto& decorationData : result->_decorationData) {
+        if (decorationData._type == DecorationType::Tree) {
+          InstancedModel* model = new InstancedModel(CachedModelType::Tree);
+          model->setNumInstances(decorationData._matrices.size());
+          model->setCenter(decorationData._center);
+          model->setInstanceMatrices(std::move(decorationData._matrices));
+          models.emplace_back(std::unique_ptr<InstancedModel>(model));
+        }        
+      }
+      _grids.emplace_back(gridXIdx, gridZIdx, new Grid(result->_vertices, result->_indices, result->_gridSize, result->_gridPosition, std::move(models)));
       printf("Grid at %d %d is done\n", gridXIdx, gridZIdx);
-      _grids.emplace_back(gridXIdx, gridZIdx, new Grid(result->_vertices, result->_normals, result->_indices, result->_size, result->_position));
     }
   }
 
@@ -129,43 +145,56 @@ GridGenerator::GridData* GridGenerator::Worker::generateData(std::size_t size, c
   NoiseGenerator generator(size, (int)posOffset.x, (int)posOffset.z);
 
   unsigned numVerts = (size + 1) * (size + 1) * 3;
-  unsigned numNormals = (size + 1) * (size + 1) * 3;
   unsigned numIndices = size * size * 6;
+
+  GridDecorationData treeDecorationData;
+  treeDecorationData._type = DecorationType::Tree;
+  treeDecorationData._center = glm::vec3(0.0, 0.0, 0.0);
 
   GridData* data = new GridData;
   data->_vertices = new float[numVerts];
   data->_indices = new unsigned[numIndices];
-  data->_normals = new float[numNormals];
-  data->_size = size;
-  data->_position = posOffset;
+  data->_gridSize = size;
+  data->_gridPosition = posOffset;
 
   for (unsigned y = 0; y <= size; ++y) {
     for (unsigned x = 0; x <= size; ++x) {
+      // Terrain
       double dx = static_cast<double>(x);
       double dy = static_cast<double>(y);
-      double height = generator.getAt(x, y);
+      double height = generator.getHeightAt(x, y);
 
       unsigned offset = 3 * (y * (size + 1));
       data->_vertices[offset + (x * 3) + 0] = (GLfloat)x;
       data->_vertices[offset + (x * 3) + 1] = height;
       data->_vertices[offset + (x * 3) + 2] = (GLfloat)y;
 
-      double offsetX = dx + 0.01;
-      double offsetY = dy + 0.01;
-      double dHeightX = generator.getAt(x + 1, y);
-      double dHeightY = generator.getAt(x, y + 1);
+      // Decorations
+      // testing
+      DecorationData decData = generator.getDecorationDataAt(x, y);
+      if (decData._type == DecorationType::Tree) {
+        printf("Placing a tree!\n");
+        glm::vec3 pos(dx, height, dy);
+        pos += posOffset;
+        glm::mat4 translation = glm::translate(pos);
+        glm::mat4 scale = glm::scale(glm::vec3(decData._scale));
+        glm::mat4 rotation = glm::yawPitchRoll(
+          glm::radians(decData._yRotDeg),
+          glm::radians(decData._xRotDeg),
+          glm::radians(decData._zRotDeg));
+        treeDecorationData._center += pos;
+        treeDecorationData._matrices.emplace_back(translation * rotation * scale);
+      }
 
-      glm::vec3 p1(dx, height, dy);
-      glm::vec3 p2(dx + 1.0, dHeightX, dy);
-      glm::vec3 p3(dx, dHeightY, dy + 1.0);
-
-      glm::vec3 ax1 = p2 - p1;
-      glm::vec3 ax2 = p3 - p1;
-      glm::vec3 norm = -glm::normalize(glm::cross(ax1, ax2)); 
-
-      data->_normals[3 * (y * (size + 1)) + (x * 3) + 0] = norm.x;
-      data->_normals[3 * (y * (size + 1)) + (x * 3) + 1] = norm.y;
-      data->_normals[3 * (y * (size + 1)) + (x * 3) + 2] = norm.z;
+      /*if (height >= -10.22 && height <= -10.21) {
+        // Place a tree
+        printf("Placing a tree!\n");
+        glm::vec3 pos(dx, height, dy);
+        pos += posOffset;
+        glm::mat4 translation = glm::translate(pos);
+        treeDecorationData._center += pos;
+        treeDecorationData._matrices.emplace_back(std::move(translation));
+      }*/
     }
   }
 
@@ -179,6 +208,9 @@ GridGenerator::GridData* GridGenerator::Worker::generateData(std::size_t size, c
       data->_indices[6 * size * y + (x * 6) + 5] = (y + 1) * (size + 1) + (x + 1);
     }
   }
+
+  treeDecorationData._center /= treeDecorationData._matrices.size();
+  data->_decorationData = {treeDecorationData};
 
   return data;
 }

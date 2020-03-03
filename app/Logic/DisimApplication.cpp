@@ -1,6 +1,7 @@
 #include "DisimApplication.h"
 
 #include "../Utils/GraphicsUtils.h"
+#include "../Utils/ObjModelCache.h"
 
 #include <GLFW/glfw3.h>
 
@@ -14,6 +15,10 @@ DisimApplication::DisimApplication()
 {
   //std::cout << "Setting wireframe" << std::endl;
   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_grass.obj", CachedModelType::Grass);
+  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_rock.obj", CachedModelType::Rock);
+  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_tree.obj", CachedModelType::Tree);
 }
 
 void DisimApplication::render()

@@ -13,7 +13,7 @@ VertexArray::VertexArray(GLfloat* vertices, GLint count, GLint floatPerVertex)
 
 	glGenBuffers(1, &_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-	glBufferData(GL_ARRAY_BUFFER, floatPerVertex * count * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, count * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
 	glVertexAttribPointer(Shader::VERTEX_ATTRIB_LOC, floatPerVertex, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(Shader::VERTEX_ATTRIB_LOC);
 
@@ -42,6 +42,32 @@ VertexArray::VertexArray(GLfloat* vertices, GLint numVerts, GLfloat* normals, GL
 	glBufferData(GL_ARRAY_BUFFER, numNormals * sizeof(GLfloat), normals, GL_STATIC_DRAW);
 	glVertexAttribPointer(Shader::NORMAL_ATTRIB_LOC, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(Shader::NORMAL_ATTRIB_LOC);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
+VertexArray::VertexArray(GLfloat* vertices, GLfloat* colors, GLint numVerts, GLint numColors, GLint floatPerVertex, bool dummy)
+{
+  _tbo = 0;
+  _cbo = 0;
+  _nbo = 0;
+  _count = numVerts;
+
+  glGenVertexArrays(1, &_vao);
+	glBindVertexArray(_vao);
+
+	glGenBuffers(1, &_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+	glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
+	glVertexAttribPointer(Shader::VERTEX_ATTRIB_LOC, floatPerVertex, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(Shader::VERTEX_ATTRIB_LOC);
+
+  glGenBuffers(1, &_cbo);
+	glBindBuffer(GL_ARRAY_BUFFER, _cbo);
+	glBufferData(GL_ARRAY_BUFFER, numColors * sizeof(GLfloat), colors, GL_STATIC_DRAW);
+	glVertexAttribPointer(Shader::COLOR_ATTRIB_LOC, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(Shader::COLOR_ATTRIB_LOC);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);

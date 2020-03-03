@@ -23,13 +23,21 @@ public:
   void update(const Camera& camera, double delta, std::vector<Grid*>& activeGrids);
 
 private:
+  struct GridDecorationData
+  {
+    DecorationType _type;
+    std::vector<glm::mat4> _matrices; // Size of this vector also determines number of instances
+    glm::vec3 _center;
+  };
+
   struct GridData
   {
     float* _vertices;
-    float* _normals;
     unsigned* _indices;
-    std::size_t _size;
-    glm::vec3 _position;
+    std::size_t _gridSize;
+    glm::vec3 _gridPosition;
+
+    std::vector<GridDecorationData> _decorationData;
   };
 
   struct Worker

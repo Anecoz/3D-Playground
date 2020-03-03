@@ -6,15 +6,17 @@
 
 #include <cstddef>
 #include <memory>
+#include <vector>
 
 class IndexedVertexArray;
+class InstancedModel;
 class Camera;
 
 class Grid
 {
 public:
   Grid();
-  Grid(float* verts, float* normals, unsigned* indices, std::size_t size, const glm::vec3& position);
+  Grid(float* verts, unsigned* indices, std::size_t size, const glm::vec3& position, std::vector<std::unique_ptr<InstancedModel>>&& models);
   ~Grid();
 
   void draw(const Camera& camera);
@@ -25,7 +27,6 @@ public:
 
 private:
   float* _verts;
-  float* _normals;
   unsigned* _indices;
 
   glm::vec3 _position;
@@ -34,4 +35,6 @@ private:
   glm::mat4 _modelMatrix;
   std::unique_ptr<IndexedVertexArray> _mesh;
   Shader _shader;
+
+  std::vector<std::unique_ptr<InstancedModel>> _models;
 };

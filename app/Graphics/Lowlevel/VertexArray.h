@@ -11,6 +11,9 @@ public:
   // Verts, normals
   VertexArray(GLfloat* vertices, GLint numVerts, GLfloat* normals, GLint numNormals, GLint floatPerVertex);
 
+  // Verts, colors
+  VertexArray(GLfloat* vertices, GLfloat* colors, GLint numVerts, GLint numColors, GLint floatPerVertex, bool dummy);
+
   // Verts, normals, colors
   VertexArray(GLfloat* vertices, GLint numVerts, GLfloat* normals, GLint numNormals, GLfloat* colors, GLint numColors, GLint floatPerVertex);
 

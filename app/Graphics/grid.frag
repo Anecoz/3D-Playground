@@ -21,6 +21,9 @@ vec3 calcColor(float height, float angle) {
   if (angle > M_PI/5.0) {
     return BASE_COL_MOUNTAIN;
   }
+  if (height > 40.0) {
+    return clamp(mix(ALT_COL_GRASS, ALT_COL_GRASS, height/60.0), BASE_COL_MOUNTAIN, ALT_COL_GRASS);
+  }
   //return ALT_COL_GRASS;
   return clamp(mix(BASE_COL_GRASS, ALT_COL_GRASS, angle/(M_PI/6.0)), BASE_COL_GRASS, ALT_COL_GRASS);
 }

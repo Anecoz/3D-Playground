@@ -10,7 +10,7 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
-InstancedModel::InstancedModel(const std::string& objPath)
+InstancedModel::InstancedModel(CachedModelType type)
   :  _center(0.0, 0.0, 0.0)
   ,  _numInstances(1)
   ,  _shader(
@@ -20,22 +20,14 @@ InstancedModel::InstancedModel(const std::string& objPath)
   , _mesh(nullptr)
   , _modelMatrix(glm::scale(glm::vec3(1.0)))
 {
-  // Find directory
-  std::string directory = objPath;
-  const size_t lastSlashIdx = objPath.rfind('/');
-  if (std::string::npos != lastSlashIdx) {
-    directory = objPath.substr(0, lastSlashIdx);
-  }
 
   OBJData data;
-  if (OBJLoader::loadFromFile(objPath, directory, data)) {
+  if (ObjModelCache::getCachedModel(type, &data)) {
     _mesh = std::unique_ptr<IndexedVertexArray>(new IndexedVertexArray(
       (GLfloat*)&data._vertices[0],
       (GLuint*)&data._indices[0],
-      (GLfloat*)&data._normals[0],
       (GLfloat*)&data._colors[0],
       data._colors.size(),
-      data._normals.size(),
       data._vertices.size(),
       data._indices.size(),
       3,

@@ -33,9 +33,9 @@ void DecorationGenerator::update(const Camera& camera, const std::vector<Grid*>&
     std::vector<glm::mat4> grassMatrices;
     std::vector<glm::mat4> rockMatrices;
     std::vector<glm::mat4> treeMatrices;
-    glm::vec3 grassCenter;
-    glm::vec3 rockCenter;
-    glm::vec3 treeCenter;
+    glm::vec3 grassCenter(0.0, 0.0, 0.0);
+    glm::vec3 rockCenter(0.0, 0.0, 0.0);
+    glm::vec3 treeCenter(0.0, 0.0, 0.0);
     for (int x = 0; x < grid->getSize(); ++x/*x = x + 16*/) {
       for (int z = 0; z < grid->getSize(); ++z/*z = z + 16*/) {
         double dx = (double)x + grid->getPosition().x;
@@ -88,24 +88,24 @@ void DecorationGenerator::update(const Camera& camera, const std::vector<Grid*>&
 
     std::vector<InstancedModel*> models;
     if (!grassMatrices.empty()) {
-      InstancedModel* model = new InstancedModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_grass.obj");
-      model->setNumInstances(grassMatrices.size() / 3);
+      InstancedModel* model = new InstancedModel(CachedModelType::Grass);
+      model->setNumInstances(grassMatrices.size());
       grassCenter /= grassMatrices.size();
       model->setCenter(grassCenter);
       model->setInstanceMatrices(std::move(grassMatrices));
       models.emplace_back(model);
     }
     if (!rockMatrices.empty()) {
-      InstancedModel* model = new InstancedModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_rock.obj");
-      model->setNumInstances(rockMatrices.size() / 3);
+      InstancedModel* model = new InstancedModel(CachedModelType::Rock);
+      model->setNumInstances(rockMatrices.size());
       rockCenter /= rockMatrices.size();
       model->setCenter(rockCenter);
       model->setInstanceMatrices(std::move(rockMatrices));
       models.emplace_back(model);
     }
     if (!treeMatrices.empty()) {
-      InstancedModel* model = new InstancedModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_tree.obj");
-      model->setNumInstances(treeMatrices.size() / 3);
+      InstancedModel* model = new InstancedModel(CachedModelType::Tree);
+      model->setNumInstances(treeMatrices.size());
       treeCenter /= treeMatrices.size();
       model->setCenter(treeCenter);
       model->setInstanceMatrices(std::move(treeMatrices));

@@ -1,7 +1,6 @@
 #version 430
 
 layout (location = 0) in vec3 inPosition;
-layout (location = 2) in vec3 inNormal;
 
 uniform mat4 camMatrix;
 uniform mat4 projMatrix;

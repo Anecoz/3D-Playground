@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../Utils/ObjModelCache.h"
 #include "Lowlevel/Shader.h"
 
 #include <glm/glm.hpp>
@@ -14,7 +15,7 @@ class IndexedVertexArray;
 class InstancedModel
 {
 public:
-  InstancedModel(const std::string& objPath);
+  InstancedModel(CachedModelType type);
   ~InstancedModel();
 
   void draw(const Camera& camera);
