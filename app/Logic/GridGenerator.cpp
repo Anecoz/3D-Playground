@@ -170,31 +170,23 @@ GridGenerator::GridData* GridGenerator::Worker::generateData(std::size_t size, c
       data->_vertices[offset + (x * 3) + 2] = (GLfloat)y;
 
       // Decorations
-      // testing
       DecorationData decData = generator.getDecorationDataAt(x, y);
       if (decData._type == DecorationType::Tree) {
-        printf("Placing a tree!\n");
-        glm::vec3 pos(dx, height, dy);
-        pos += posOffset;
-        glm::mat4 translation = glm::translate(pos);
-        glm::mat4 scale = glm::scale(glm::vec3(decData._scale));
-        glm::mat4 rotation = glm::yawPitchRoll(
-          glm::radians(decData._yRotDeg),
-          glm::radians(decData._xRotDeg),
-          glm::radians(decData._zRotDeg));
-        treeDecorationData._center += pos;
-        treeDecorationData._matrices.emplace_back(translation * rotation * scale);
-      }
+        double treeHeight = generator.getHeightAt(x + decData._offsetX, y + decData._offsetZ);
 
-      /*if (height >= -10.22 && height <= -10.21) {
-        // Place a tree
-        printf("Placing a tree!\n");
-        glm::vec3 pos(dx, height, dy);
-        pos += posOffset;
-        glm::mat4 translation = glm::translate(pos);
-        treeDecorationData._center += pos;
-        treeDecorationData._matrices.emplace_back(std::move(translation));
-      }*/
+        if (treeHeight < 9000000.0) {
+          glm::vec3 pos(dx + decData._offsetX, treeHeight, dy + decData._offsetZ);
+          pos += posOffset;
+          glm::mat4 translation = glm::translate(pos);
+          glm::mat4 scale = glm::scale(glm::vec3(decData._scale));
+          glm::mat4 rotation = glm::yawPitchRoll(
+            glm::radians(decData._yRotDeg),
+            glm::radians(decData._xRotDeg),
+            glm::radians(decData._zRotDeg));
+          treeDecorationData._center += pos;
+          treeDecorationData._matrices.emplace_back(translation * rotation * scale);
+        }       
+      }
     }
   }
 

@@ -7,13 +7,16 @@
 using namespace noise;
 
 NoiseGenerator::NoiseGenerator(std::size_t mapSize, int xOffset, int yOffset)
-  : _mapSize(mapSize + 16)
+  : _mapSize(mapSize + _mapBufferSize)
   , _scale(3.5)
   , _xOffset(xOffset)
   , _yOffset(yOffset)
 {
   buildHeightMap();
   buildDecorationMap();
+  buildDecorationScaleMap();
+  buildDecorationOffsetMaps();
+  buildDecorationRotMaps();
 }
 
 void NoiseGenerator::buildHeightMap()
@@ -157,10 +160,151 @@ void NoiseGenerator::buildDecorationMap()
   heightMapBuilder.Build ();
 }
 
+void NoiseGenerator::buildDecorationScaleMap()
+{
+  module::Perlin placementHelper;
+  placementHelper.SetFrequency(4.0);
+  placementHelper.SetOctaveCount(3);
+
+  module::ScaleBias biaser;
+  biaser.SetSourceModule(0, placementHelper);
+  biaser.SetBias(1.0);
+
+  module::Clamp clamper;
+  clamper.SetSourceModule(0, biaser);
+  clamper.SetBounds(0.7, 2.0);
+
+  utils::NoiseMapBuilderPlane heightMapBuilder;
+  heightMapBuilder.SetSourceModule (clamper);
+  heightMapBuilder.SetDestNoiseMap (_decorationScaleMap);
+  heightMapBuilder.SetDestSize (_mapSize, _mapSize);
+
+  heightMapBuilder.SetBounds (
+    (double)_xOffset/(double)_mapSize * _scale,
+    (double)_xOffset/(double)_mapSize * _scale + _scale,
+    (double)_yOffset/(double)_mapSize * _scale,
+    (double)_yOffset/(double)_mapSize * _scale + _scale);
+  heightMapBuilder.Build ();
+}
+
+void NoiseGenerator::buildDecorationOffsetMaps()
+{
+  // X
+  module::Perlin placementHelperX;
+  placementHelperX.SetFrequency(4.0);
+  placementHelperX.SetOctaveCount(3);
+
+  module::ScaleBias scaleBiasX;
+  scaleBiasX.SetSourceModule(0, placementHelperX);
+  scaleBiasX.SetScale(100.0);
+
+  utils::NoiseMapBuilderPlane heightMapBuilderX;
+  heightMapBuilderX.SetSourceModule (scaleBiasX);
+  heightMapBuilderX.SetDestNoiseMap (_decorationOffsetMapX);
+  heightMapBuilderX.SetDestSize (_mapSize, _mapSize);
+
+  heightMapBuilderX.SetBounds (
+    (double)_xOffset/(double)_mapSize * _scale,
+    (double)_xOffset/(double)_mapSize * _scale + _scale,
+    (double)_yOffset/(double)_mapSize * _scale,
+    (double)_yOffset/(double)_mapSize * _scale + _scale);
+  heightMapBuilderX.Build ();
+
+  // Z
+  module::Perlin placementHelperZ;
+  placementHelperZ.SetFrequency(2.0);
+  placementHelperZ.SetOctaveCount(3);
+
+  module::ScaleBias scaleBiasZ;
+  scaleBiasZ.SetSourceModule(0, placementHelperZ);
+  scaleBiasZ.SetScale(100.0);
+
+  utils::NoiseMapBuilderPlane heightMapBuilderZ;
+  heightMapBuilderZ.SetSourceModule (scaleBiasZ);
+  heightMapBuilderZ.SetDestNoiseMap (_decorationOffsetMapZ);
+  heightMapBuilderZ.SetDestSize (_mapSize, _mapSize);
+
+  heightMapBuilderZ.SetBounds (
+    (double)_xOffset/(double)_mapSize * _scale,
+    (double)_xOffset/(double)_mapSize * _scale + _scale,
+    (double)_yOffset/(double)_mapSize * _scale,
+    (double)_yOffset/(double)_mapSize * _scale + _scale);
+  heightMapBuilderZ.Build ();
+}
+
+void NoiseGenerator::buildDecorationRotMaps()
+{
+  // X
+  module::Perlin placementHelperX;
+  placementHelperX.SetFrequency(2.0);
+  placementHelperX.SetOctaveCount(3);
+
+  module::ScaleBias scaleBiasX;
+  scaleBiasX.SetSourceModule(0, placementHelperX);
+  scaleBiasX.SetScale(10.0);
+
+  utils::NoiseMapBuilderPlane heightMapBuilderX;
+  heightMapBuilderX.SetSourceModule (scaleBiasX);
+  heightMapBuilderX.SetDestNoiseMap (_decorationRotX);
+  heightMapBuilderX.SetDestSize (_mapSize, _mapSize);
+
+  heightMapBuilderX.SetBounds (
+    (double)_xOffset/(double)_mapSize * _scale,
+    (double)_xOffset/(double)_mapSize * _scale + _scale,
+    (double)_yOffset/(double)_mapSize * _scale,
+    (double)_yOffset/(double)_mapSize * _scale + _scale);
+  heightMapBuilderX.Build ();
+
+  // Y
+  module::Perlin placementHelperY;
+  placementHelperY.SetFrequency(2.0);
+  placementHelperY.SetOctaveCount(3);
+
+  module::ScaleBias scaleBiasY;
+  scaleBiasY.SetSourceModule(0, placementHelperY);
+  scaleBiasY.SetScale(180.0);
+  scaleBiasY.SetBias(180.0);
+
+  utils::NoiseMapBuilderPlane heightMapBuilderY;
+  heightMapBuilderY.SetSourceModule (scaleBiasY);
+  heightMapBuilderY.SetDestNoiseMap (_decorationRotY);
+  heightMapBuilderY.SetDestSize (_mapSize, _mapSize);
+
+  heightMapBuilderY.SetBounds (
+    (double)_xOffset/(double)_mapSize * _scale,
+    (double)_xOffset/(double)_mapSize * _scale + _scale,
+    (double)_yOffset/(double)_mapSize * _scale,
+    (double)_yOffset/(double)_mapSize * _scale + _scale);
+  heightMapBuilderY.Build ();
+
+  // Z
+  module::Perlin placementHelperZ;
+  placementHelperZ.SetFrequency(2.0);
+  placementHelperZ.SetOctaveCount(3);
+
+  module::ScaleBias scaleBiasZ;
+  scaleBiasZ.SetSourceModule(0, placementHelperZ);
+  scaleBiasZ.SetScale(10.0);
+
+  utils::NoiseMapBuilderPlane heightMapBuilderZ;
+  heightMapBuilderZ.SetSourceModule (scaleBiasZ);
+  heightMapBuilderZ.SetDestNoiseMap (_decorationRotZ);
+  heightMapBuilderZ.SetDestSize (_mapSize, _mapSize);
+
+  heightMapBuilderZ.SetBounds (
+    (double)_xOffset/(double)_mapSize * _scale,
+    (double)_xOffset/(double)_mapSize * _scale + _scale,
+    (double)_yOffset/(double)_mapSize * _scale,
+    (double)_yOffset/(double)_mapSize * _scale + _scale);
+  heightMapBuilderZ.Build ();
+}
+
 double NoiseGenerator::getHeightAt(int x, int z)
 {
-  if (x < 0 || x > _mapSize || z < 0 || z > _mapSize) {
-    return 0.0;
+  x += _mapBufferSize/2;
+  z += _mapBufferSize/2;
+  if (x <= 0 || x >= _mapSize || z <= 0 || z >= _mapSize) {
+    return 10000000.0;
   }
 
   return 50.0 * _heightMap.GetValue(x, z);
@@ -169,14 +313,16 @@ double NoiseGenerator::getHeightAt(int x, int z)
 DecorationData NoiseGenerator::getDecorationDataAt(int x, int z)
 {
   DecorationData data;
+  data._type = DecorationType::Nothing;
+
+  x += _mapBufferSize/2;
+  z += _mapBufferSize/2;
   if (x < 0 || x > _mapSize || z < 0 || z > _mapSize) {
-    data._type = DecorationType::Nothing;
     return data;
   }
 
   // TEST
-  if (x % 8 != 0 || z % 8 != 0) {
-    data._type = DecorationType::Nothing;
+  if (x % 6 != 0 || z % 6 != 0) {
     return data;
   }
 
@@ -184,17 +330,25 @@ DecorationData NoiseGenerator::getDecorationDataAt(int x, int z)
   double value = _decorationMap.GetValue(x, z);
   double height = getHeightAt(x, z);
 
-  /*if (height > -10.0 || height < -15.0) {
-    data._type = DecorationType::Nothing;
-    return data;
-  }*/
-
   if (value >= -10.0 && value <= 0.8) {
+    if (height > -10.0 || height < -15.0) {
+      return data;
+    }
+
+    double scale = _decorationScaleMap.GetValue(x, z);
+    double offsetX = _decorationOffsetMapX.GetValue(x, z);
+    double offsetZ = _decorationOffsetMapZ.GetValue(x, z);
+    double rotX = _decorationRotX.GetValue(x, z);
+    double rotY = _decorationRotY.GetValue(x, z);
+    double rotZ = _decorationRotZ.GetValue(x, z);
+
     data._type = DecorationType::Tree;
-    data._scale = 1.0;
-    data._xRotDeg = 0.0;
-    data._yRotDeg = 0.0;
-    data._zRotDeg = 0.0;
+    data._scale = scale;
+    data._offsetX = offsetX;
+    data._offsetZ = offsetZ;
+    data._xRotDeg = rotX;
+    data._yRotDeg = rotY;
+    data._zRotDeg = rotZ;
   }
 
   return data;
