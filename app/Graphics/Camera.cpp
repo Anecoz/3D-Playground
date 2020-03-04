@@ -21,6 +21,21 @@ Camera::Camera(const glm::vec3& initialPosition)
   , _cameraMatrix(glm::lookAt(_position, _forward, _up))
 {}
 
+bool Camera::insideFrustum(const glm::vec3& point) const
+{
+  return _frustum.isInside(point) == (Frustum::Visibility::Partially || Frustum::Visibility::Completly);
+}
+
+bool Camera::insideFrustum(const Box3D& box) const
+{
+  bool inside = _frustum.isInside(box);
+  if (inside == Frustum::Visibility::Partially || inside == Frustum::Visibility::Completly) {
+    return true;
+  }
+
+  return false;
+}
+
 void Camera::update(double delta)
 {
   if (_firstMouse) {
@@ -33,6 +48,7 @@ void Camera::update(double delta)
   // Check input and move camera
   freelookUpdate(delta);
 
+  _frustum.transform(_projection, _cameraMatrix);
   //std::cout << "Camera at: " << _position.x << ", " << _position.y << ", " << _position.z << std::endl;
 }
 

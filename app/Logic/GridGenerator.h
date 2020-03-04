@@ -37,6 +37,11 @@ private:
     std::size_t _gridSize;
     glm::vec3 _gridPosition;
 
+    bool _containsWater;
+    float* _waterVertices;
+    unsigned* _waterIndices;
+    std::size_t _numWaterVerts;
+
     std::vector<GridDecorationData> _decorationData;
   };
 
@@ -94,7 +99,8 @@ private:
     Grid* _grid;
   };
 
-  const std::size_t _gridSize = 512;
+  const double _waterHeight = -15.0;
+  const std::size_t _gridSize = 256;
   std::vector<GridEntry> _grids;
   std::vector<GridIndex> _currentlyGenerating;
 

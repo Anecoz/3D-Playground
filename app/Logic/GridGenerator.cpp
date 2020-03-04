@@ -17,6 +17,9 @@
 #include <noise/noise.h>
 #include <noise/noiseutils.h>
 
+const double g_WaterHeight = -18.0;
+const std::size_t g_ExtraGrids = 3;
+
 GridGenerator::GridGenerator()
   : _numWorkers(4)
 {
@@ -46,8 +49,8 @@ void GridGenerator::update(const Camera& camera, double delta, std::vector<Grid*
   int camxIdx = static_cast<int>(camera.getPosition().x) / _gridSize;
   int camzIdx = static_cast<int>(camera.getPosition().z) / _gridSize;
 
-  for (int xIdx = camxIdx - 1; xIdx <= camxIdx + 1; ++xIdx) {
-    for (int zIdx = camzIdx - 1; zIdx <= camzIdx + 1; ++zIdx) {
+  for (int xIdx = camxIdx - g_ExtraGrids; xIdx <= camxIdx + g_ExtraGrids; ++xIdx) {
+    for (int zIdx = camzIdx - g_ExtraGrids; zIdx <= camzIdx + g_ExtraGrids; ++zIdx) {
       auto found = std::find_if(_grids.begin(), _grids.end(), [xIdx, zIdx](const GridEntry& entry) {
         return entry._index._x == xIdx && entry._index._z == zIdx;
       });
@@ -76,7 +79,7 @@ void GridGenerator::update(const Camera& camera, double delta, std::vector<Grid*
             }
           }
           if (!foundWorker) {
-            printf("Could not find worker for grid at %d %d, guess I'll retry next update\n", xIdx, zIdx);
+            //printf("Could not find worker for grid at %d %d, guess I'll retry next update\n", xIdx, zIdx);
           }
           else {
             printf("Worker started for grid %d %d\n", xIdx, zIdx);
@@ -114,17 +117,28 @@ void GridGenerator::update(const Camera& camera, double delta, std::vector<Grid*
           models.emplace_back(std::unique_ptr<InstancedModel>(model));
         }        
       }
-      _grids.emplace_back(gridXIdx, gridZIdx, new Grid(result->_vertices, result->_indices, result->_gridSize, result->_gridPosition, std::move(models)));
+      _grids.emplace_back(
+        gridXIdx,
+        gridZIdx,
+        new Grid(
+          result->_vertices,
+          result->_indices,
+          result->_waterVertices,
+          result->_waterIndices,
+          result->_containsWater,
+          result->_gridSize,
+          result->_gridPosition,
+          std::move(models)));
       printf("Grid at %d %d is done\n", gridXIdx, gridZIdx);
     }
   }
 
   // Any grids to unload?
   for (auto it = _grids.begin(); it != _grids.end();) {
-    if (it->_index._x > camxIdx + 1 ||
-        it->_index._x < camxIdx - 1 ||
-        it->_index._z > camzIdx + 1 ||
-        it->_index._z < camzIdx - 1) {
+    if (it->_index._x > camxIdx + g_ExtraGrids ||
+        it->_index._x < camxIdx - g_ExtraGrids ||
+        it->_index._z > camzIdx + g_ExtraGrids ||
+        it->_index._z < camzIdx - g_ExtraGrids) {
       printf("Removing grid at %d %d\n", it->_index._x, it->_index._z);
       delete it->_grid;
       it = _grids.erase(it);
@@ -147,15 +161,22 @@ GridGenerator::GridData* GridGenerator::Worker::generateData(std::size_t size, c
   unsigned numVerts = (size + 1) * (size + 1) * 3;
   unsigned numIndices = size * size * 6;
 
+  // Decorations
   GridDecorationData treeDecorationData;
   treeDecorationData._type = DecorationType::Tree;
   treeDecorationData._center = glm::vec3(0.0, 0.0, 0.0);
 
+  // Terrain
   GridData* data = new GridData;
   data->_vertices = new float[numVerts];
   data->_indices = new unsigned[numIndices];
   data->_gridSize = size;
   data->_gridPosition = posOffset;
+
+  // Water
+  data->_waterVertices = new float[numVerts];
+  data->_waterIndices = new unsigned[numIndices];
+  data->_containsWater = false; // Until proven otherwise
 
   for (unsigned y = 0; y <= size; ++y) {
     for (unsigned x = 0; x <= size; ++x) {
@@ -164,10 +185,19 @@ GridGenerator::GridData* GridGenerator::Worker::generateData(std::size_t size, c
       double dy = static_cast<double>(y);
       double height = generator.getHeightAt(x, y);
 
+      if (height < g_WaterHeight) {
+        data->_containsWater = true;
+      }
+
       unsigned offset = 3 * (y * (size + 1));
       data->_vertices[offset + (x * 3) + 0] = (GLfloat)x;
       data->_vertices[offset + (x * 3) + 1] = height;
       data->_vertices[offset + (x * 3) + 2] = (GLfloat)y;
+
+      // Water
+      data->_waterVertices[offset + (x * 3) + 0] = (GLfloat)x;
+      data->_waterVertices[offset + (x * 3) + 1] = g_WaterHeight;
+      data->_waterVertices[offset + (x * 3) + 2] = (GLfloat)y;
 
       // Decorations
       DecorationData decData = generator.getDecorationDataAt(x, y);
@@ -192,17 +222,31 @@ GridGenerator::GridData* GridGenerator::Worker::generateData(std::size_t size, c
 
   for (unsigned y = 0; y < size; ++y) {
     for (unsigned x = 0; x < size; ++x) {
+      // Terrain
       data->_indices[6 * size * y + (x * 6) + 0] = y * (size + 1) + x;
       data->_indices[6 * size * y + (x * 6) + 1] = (y + 1) * (size + 1) + (x + 1);
       data->_indices[6 * size * y + (x * 6) + 2] = y * (size + 1) + (x + 1);
       data->_indices[6 * size * y + (x * 6) + 3] = y * (size + 1) + x;
       data->_indices[6 * size * y + (x * 6) + 4] = (y + 1) * (size + 1) + x;
       data->_indices[6 * size * y + (x * 6) + 5] = (y + 1) * (size + 1) + (x + 1);
+
+      // Water
+      data->_waterIndices[6 * size * y + (x * 6) + 0] = y * (size + 1) + x;
+      data->_waterIndices[6 * size * y + (x * 6) + 1] = (y + 1) * (size + 1) + (x + 1);
+      data->_waterIndices[6 * size * y + (x * 6) + 2] = y * (size + 1) + (x + 1);
+      data->_waterIndices[6 * size * y + (x * 6) + 3] = y * (size + 1) + x;
+      data->_waterIndices[6 * size * y + (x * 6) + 4] = (y + 1) * (size + 1) + x;
+      data->_waterIndices[6 * size * y + (x * 6) + 5] = (y + 1) * (size + 1) + (x + 1);
     }
   }
 
   treeDecorationData._center /= treeDecorationData._matrices.size();
   data->_decorationData = {treeDecorationData};
+
+  if (!data->_containsWater) {
+    delete[] data->_waterVertices;
+    delete[] data->_waterIndices;
+  }
 
   return data;
 }

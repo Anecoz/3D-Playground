@@ -22,9 +22,18 @@ Grid::Grid()
     "/home/christoph/dev/3D-Playground/app/Graphics/grid.frag")
 {}
 
-Grid::Grid(float* verts, unsigned* indices, std::size_t size, const glm::vec3& position, std::vector<std::unique_ptr<InstancedModel>>&& models)
+Grid::Grid(
+  float* verts,
+  unsigned* indices,
+  float* waterVerts,
+  unsigned* waterIndices,
+  bool containsWater,
+  std::size_t size,
+  const glm::vec3& position,
+  std::vector<std::unique_ptr<InstancedModel>>&& models)
   : _verts(verts)
   , _indices(indices)
+  , _containsWater(containsWater)
   , _position(position)
   , _size(size)
   , _modelMatrix(glm::scale(glm::vec3(1.0)))
@@ -33,12 +42,24 @@ Grid::Grid(float* verts, unsigned* indices, std::size_t size, const glm::vec3& p
     "/home/christoph/dev/3D-Playground/app/Graphics/grid.vert",
     "/home/christoph/dev/3D-Playground/app/Graphics/grid.geom",
     "/home/christoph/dev/3D-Playground/app/Graphics/grid.frag")
+  , _waterShader(
+    "/home/christoph/dev/3D-Playground/app/Graphics/water.vert",
+    "/home/christoph/dev/3D-Playground/app/Graphics/water.geom",
+    "/home/christoph/dev/3D-Playground/app/Graphics/water.frag"
+  )
   , _models(std::move(models))
 {
   unsigned numVerts = (_size + 1) * (_size + 1) * 3;
   unsigned numIndices = _size * _size * 6;
 
   _mesh = std::make_unique<IndexedVertexArray>(verts, indices, numVerts, numIndices, 3);
+
+  if (containsWater) {
+    _waterMesh = std::make_unique<IndexedVertexArray>(waterVerts, waterIndices, numVerts, numIndices, 3);
+
+    delete[] waterVerts;
+    delete[] waterIndices;
+  }
 }
 
 Grid::~Grid()
@@ -78,7 +99,9 @@ void Grid::draw(const Camera& camera)
 {
   for (auto& model: _models) {
     if (glm::distance(camera.getPosition(), model->getCenter()) < 512.0) {
-      model->draw(camera);
+      //if (camera.insideFrustum(model->getCenter())) {
+        model->draw(camera);
+      //}
     }
   }
 
@@ -91,4 +114,14 @@ void Grid::draw(const Camera& camera)
   _shader.uploadMatrix(_modelMatrix, "modelMatrix");
   _mesh->draw();
   _shader.unbind();
+
+  if (_containsWater) {
+    _waterShader.bind();
+    _waterShader.uploadVec(camera.getPosition(), "cameraPos");
+    _waterShader.uploadMatrix(camera.getCamMatrix(), "camMatrix");
+    _waterShader.uploadMatrix(camera.getProjection(), "projMatrix");
+    _waterShader.uploadMatrix(_modelMatrix, "modelMatrix");
+    _waterMesh->draw();
+    _waterShader.unbind();
+  }
 }

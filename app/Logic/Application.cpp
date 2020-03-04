@@ -90,7 +90,7 @@ void Application::run()
 
 void Application::initWindowHandle()
 {
-	//glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_SAMPLES, 4);
 	//glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
 	_window = glfwCreateWindow(1920, 1080, "Disim", NULL, NULL);

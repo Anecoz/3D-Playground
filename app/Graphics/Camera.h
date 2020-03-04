@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Frustum.h"
+
 #include <glm/glm.hpp>
 
 class Camera
@@ -16,9 +18,14 @@ public:
   glm::mat4 getCamMatrix() const { return _cameraMatrix; }
   glm::mat4 getCombined() const { return _projection * _cameraMatrix; }
 
+  bool insideFrustum(const glm::vec3& point) const;
+  bool insideFrustum(const Box3D& box) const;
+
 private:
   void freelookUpdate(double delta);
   void handleFreelookInput(double delta);
+
+  Frustum _frustum;
 
   glm::vec2 _prevFreelookMousePos;
   bool _firstMouse;
