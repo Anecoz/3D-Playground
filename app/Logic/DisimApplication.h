@@ -20,6 +20,8 @@ public:
   void update(double delta) override;
 
 private:
+  InstancedModel* _testModel;
+
   std::vector<Grid*> _currentGrids;
   Camera _camera;
   TerrainCollisionHandler _terrainCollisionHandler;

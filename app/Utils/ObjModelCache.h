@@ -11,7 +11,8 @@ enum class CachedModelType
   Tree2,
   Rock,
   SmallRock,
-  Grass
+  Grass,
+  Bridge
 };
 
 class ObjModelCache
