@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Lowlevel/Shader.h"
+#include "Box3D.h"
 
 #include <glm/glm.hpp>
 
@@ -24,10 +25,14 @@ public:
     bool containsWater,
     std::size_t size,
     const glm::vec3& position,
+    const Box3D& boundingBox,
     std::vector<std::unique_ptr<InstancedModel>>&& models);
   ~Grid();
 
   void draw(const Camera& camera);
+  void drawWater(const Camera& camera);
+
+  const Box3D& getBoundingBox();
 
   bool heightAt(double x, double z, double* heightOut) const;
   const glm::vec3& getPosition();
@@ -41,6 +46,7 @@ private:
 
   glm::vec3 _position;
   std::size_t _size;
+  Box3D _boundingBox;
 
   glm::mat4 _modelMatrix;
   std::unique_ptr<IndexedVertexArray> _mesh;

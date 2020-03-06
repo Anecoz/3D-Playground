@@ -28,6 +28,7 @@ private:
     DecorationType _type;
     std::vector<glm::mat4> _matrices; // Size of this vector also determines number of instances
     glm::vec3 _center;
+    Box3D _boundingBox;
   };
 
   struct GridData
@@ -36,6 +37,7 @@ private:
     unsigned* _indices;
     std::size_t _gridSize;
     glm::vec3 _gridPosition;
+    Box3D _boundingBox;
 
     bool _containsWater;
     float* _waterVertices;
@@ -43,6 +45,8 @@ private:
     std::size_t _numWaterVerts;
 
     std::vector<GridDecorationData> _decorationData;
+
+    void addDecorationData(DecorationType type, glm::mat4&& matrix, glm::vec3&& position);
   };
 
   struct Worker

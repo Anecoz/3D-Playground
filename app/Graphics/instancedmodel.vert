@@ -15,5 +15,6 @@ out vec3 geomPosition;
 void main() {
   geomColor = inColor;
   geomPosition = vec3(instanceMatrix * vec4(inPosition, 1.0));
+  
   gl_Position = projMatrix * camMatrix * vec4(geomPosition, 1.0);
 }

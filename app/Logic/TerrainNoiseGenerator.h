@@ -8,7 +8,9 @@ enum class DecorationType
   Nothing,
   Grass,
   Rock,
-  Tree
+  SmallRock,
+  Tree,
+  Tree2
 };
 
 struct DecorationData

@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <limits>
 #include <stdio.h>
 
 #include <GL/glew.h>
@@ -109,14 +110,38 @@ void GridGenerator::update(const Camera& camera, double delta, std::vector<Grid*
       // Create the models
       std::vector<std::unique_ptr<InstancedModel>> models;
       for (auto& decorationData : result->_decorationData) {
+        // Sanity check
+        if (decorationData._type == DecorationType::Nothing) continue;
+
+        InstancedModel* model = nullptr;
         if (decorationData._type == DecorationType::Tree) {
-          InstancedModel* model = new InstancedModel(CachedModelType::Tree);
+          model = new InstancedModel(CachedModelType::Tree);          
+        }
+        if (decorationData._type == DecorationType::Tree2) {
+          model = new InstancedModel(CachedModelType::Tree2);          
+        }
+        if (decorationData._type == DecorationType::SmallRock) {
+          model = new InstancedModel(CachedModelType::SmallRock);          
+        }
+        if (decorationData._type == DecorationType::Grass) {
+          model = new InstancedModel(CachedModelType::Grass);          
+        }
+        if (decorationData._type == DecorationType::Rock) {
+          model = new InstancedModel(CachedModelType::Rock);          
+        }
+
+        if (model) {
+          model->setBoundingBox(std::move(decorationData._boundingBox));
           model->setNumInstances(decorationData._matrices.size());
           model->setCenter(decorationData._center);
           model->setInstanceMatrices(std::move(decorationData._matrices));
           models.emplace_back(std::unique_ptr<InstancedModel>(model));
-        }        
+        }
+        else {
+          printf("Unhandled Decoration type in generator!\n");
+        } 
       }
+      // Create the new Grid
       _grids.emplace_back(
         gridXIdx,
         gridZIdx,
@@ -128,6 +153,7 @@ void GridGenerator::update(const Camera& camera, double delta, std::vector<Grid*
           result->_containsWater,
           result->_gridSize,
           result->_gridPosition,
+          result->_boundingBox,
           std::move(models)));
       printf("Grid at %d %d is done\n", gridXIdx, gridZIdx);
     }
@@ -154,17 +180,36 @@ void GridGenerator::update(const Camera& camera, double delta, std::vector<Grid*
   }
 }
 
+void GridGenerator::GridData::addDecorationData(DecorationType type, glm::mat4&& matrix, glm::vec3&& position)
+{
+  auto it = std::find_if(_decorationData.begin(), _decorationData.end(), [type](const GridDecorationData& data) {
+    return data._type == type;
+  });
+
+  if (it != _decorationData.end()) {
+    // Already have decoration data of this type, add it to the list
+    it->_matrices.emplace_back(std::move(matrix));
+    it->_boundingBox.extend(position);
+    it->_center += std::move(position);
+    it->_center /= it->_matrices.size();    
+  }
+  else {
+    // Create new decoration data of this type
+    GridDecorationData data;
+    data._type = type;
+    data._boundingBox.extend(position);
+    data._matrices.emplace_back(std::move(matrix));
+    data._center = std::move(position);
+    _decorationData.emplace_back(std::move(data));
+  }
+}
+
 GridGenerator::GridData* GridGenerator::Worker::generateData(std::size_t size, const glm::vec3& posOffset)
 {
   NoiseGenerator generator(size, (int)posOffset.x, (int)posOffset.z);
 
   unsigned numVerts = (size + 1) * (size + 1) * 3;
   unsigned numIndices = size * size * 6;
-
-  // Decorations
-  GridDecorationData treeDecorationData;
-  treeDecorationData._type = DecorationType::Tree;
-  treeDecorationData._center = glm::vec3(0.0, 0.0, 0.0);
 
   // Terrain
   GridData* data = new GridData;
@@ -178,12 +223,21 @@ GridGenerator::GridData* GridGenerator::Worker::generateData(std::size_t size, c
   data->_waterIndices = new unsigned[numIndices];
   data->_containsWater = false; // Until proven otherwise
 
+  double minHeight = std::numeric_limits<double>::max();
+  double maxHeight = std::numeric_limits<double>::min();
   for (unsigned y = 0; y <= size; ++y) {
     for (unsigned x = 0; x <= size; ++x) {
       // Terrain
       double dx = static_cast<double>(x);
       double dy = static_cast<double>(y);
       double height = generator.getHeightAt(x, y);
+
+      if (height < minHeight) {
+        minHeight = height;
+      }
+      if (height > maxHeight) {
+        maxHeight = height;
+      }
 
       if (height < g_WaterHeight) {
         data->_containsWater = true;
@@ -201,11 +255,12 @@ GridGenerator::GridData* GridGenerator::Worker::generateData(std::size_t size, c
 
       // Decorations
       DecorationData decData = generator.getDecorationDataAt(x, y);
-      if (decData._type == DecorationType::Tree) {
-        double treeHeight = generator.getHeightAt(x + decData._offsetX, y + decData._offsetZ);
+      if (decData._type != DecorationType::Nothing) {
+        double height = generator.getHeightAt(x + decData._offsetX, y + decData._offsetZ);
 
-        if (treeHeight < 9000000.0) {
-          glm::vec3 pos(dx + decData._offsetX, treeHeight, dy + decData._offsetZ);
+        // getHeightAt will return a huge number if we're outside of map
+        if (height < 9000000.0 /*&& height >= -15.0 && height <= 10.0*/) {
+          glm::vec3 pos(dx + decData._offsetX, height, dy + decData._offsetZ);
           pos += posOffset;
           glm::mat4 translation = glm::translate(pos);
           glm::mat4 scale = glm::scale(glm::vec3(decData._scale));
@@ -213,8 +268,7 @@ GridGenerator::GridData* GridGenerator::Worker::generateData(std::size_t size, c
             glm::radians(decData._yRotDeg),
             glm::radians(decData._xRotDeg),
             glm::radians(decData._zRotDeg));
-          treeDecorationData._center += pos;
-          treeDecorationData._matrices.emplace_back(translation * rotation * scale);
+          data->addDecorationData(decData._type, translation * rotation * scale, std::move(pos));
         }       
       }
     }
@@ -240,13 +294,14 @@ GridGenerator::GridData* GridGenerator::Worker::generateData(std::size_t size, c
     }
   }
 
-  treeDecorationData._center /= treeDecorationData._matrices.size();
-  data->_decorationData = {treeDecorationData};
-
   if (!data->_containsWater) {
     delete[] data->_waterVertices;
     delete[] data->_waterIndices;
   }
+
+  glm::vec3 c0(data->_gridPosition.x, minHeight, data->_gridPosition.z);
+  glm::vec3 c1(data->_gridPosition.x + data->_gridSize, maxHeight, data->_gridPosition.z + data->_gridSize);
+  data->_boundingBox = Box3D(c0, c1);
 
   return data;
 }

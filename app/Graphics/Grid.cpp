@@ -30,12 +30,14 @@ Grid::Grid(
   bool containsWater,
   std::size_t size,
   const glm::vec3& position,
+  const Box3D& boundingBox,
   std::vector<std::unique_ptr<InstancedModel>>&& models)
   : _verts(verts)
   , _indices(indices)
   , _containsWater(containsWater)
   , _position(position)
   , _size(size)
+  , _boundingBox(boundingBox)
   , _modelMatrix(glm::scale(glm::vec3(1.0)))
   , _mesh(nullptr)
   , _shader(
@@ -85,6 +87,11 @@ bool Grid::heightAt(double x, double z, double* heightOut) const
   return true;
 }
 
+const Box3D& Grid::getBoundingBox()
+{
+  return _boundingBox;
+}
+
 const glm::vec3& Grid::getPosition()
 {
   return _position;
@@ -98,10 +105,8 @@ std::size_t Grid::getSize() const
 void Grid::draw(const Camera& camera)
 {
   for (auto& model: _models) {
-    if (glm::distance(camera.getPosition(), model->getCenter()) < 512.0) {
-      //if (camera.insideFrustum(model->getCenter())) {
-        model->draw(camera);
-      //}
+    if (camera.insideFrustum(model->getBoundingBox())) {
+      model->draw(camera);
     }
   }
 
@@ -114,6 +119,11 @@ void Grid::draw(const Camera& camera)
   _shader.uploadMatrix(_modelMatrix, "modelMatrix");
   _mesh->draw();
   _shader.unbind();
+}
+
+void Grid::drawWater(const Camera& camera)
+{
+  _modelMatrix = glm::translate(_position);
 
   if (_containsWater) {
     _waterShader.bind();
@@ -121,6 +131,7 @@ void Grid::draw(const Camera& camera)
     _waterShader.uploadMatrix(camera.getCamMatrix(), "camMatrix");
     _waterShader.uploadMatrix(camera.getProjection(), "projMatrix");
     _waterShader.uploadMatrix(_modelMatrix, "modelMatrix");
+    _waterShader.uploadFloat((float)glfwGetTime(), "time");
     _waterMesh->draw();
     _waterShader.unbind();
   }

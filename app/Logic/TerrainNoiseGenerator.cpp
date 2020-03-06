@@ -8,7 +8,7 @@ using namespace noise;
 
 NoiseGenerator::NoiseGenerator(std::size_t mapSize, int xOffset, int yOffset)
   : _mapSize(mapSize + _mapBufferSize)
-  , _scale(3.5)
+  , _scale(((double)_mapSize * 3.5)/512.0)
   , _xOffset(xOffset)
   , _yOffset(yOffset)
 {
@@ -329,27 +329,37 @@ DecorationData NoiseGenerator::getDecorationDataAt(int x, int z)
   // Sample decorationMap, use value to determine type
   double value = _decorationMap.GetValue(x, z);
   double height = getHeightAt(x, z);
+  double scale = _decorationScaleMap.GetValue(x, z);
+  double offsetX = _decorationOffsetMapX.GetValue(x, z);
+  double offsetZ = _decorationOffsetMapZ.GetValue(x, z);
+  double rotX = _decorationRotX.GetValue(x, z);
+  double rotY = _decorationRotY.GetValue(x, z);
+  double rotZ = _decorationRotZ.GetValue(x, z);
 
-  if (value >= -10.0 && value <= 0.8) {
-    if (height > -10.0 || height < -15.0) {
-      return data;
+  // The output of the decoration map (for now) is binary, -1 or 1
+  if (value < 0.5) {
+    if (height > -13.5 && height < -11.5) {
+      data._type = DecorationType::Tree;
     }
-
-    double scale = _decorationScaleMap.GetValue(x, z);
-    double offsetX = _decorationOffsetMapX.GetValue(x, z);
-    double offsetZ = _decorationOffsetMapZ.GetValue(x, z);
-    double rotX = _decorationRotX.GetValue(x, z);
-    double rotY = _decorationRotY.GetValue(x, z);
-    double rotZ = _decorationRotZ.GetValue(x, z);
-
-    data._type = DecorationType::Tree;
-    data._scale = scale;
-    data._offsetX = offsetX;
-    data._offsetZ = offsetZ;
-    data._xRotDeg = rotX;
-    data._yRotDeg = rotY;
-    data._zRotDeg = rotZ;
+    else if (height > 15.0) {
+      data._type = DecorationType::Rock;
+    }
+    else {
+      data._type = DecorationType::SmallRock;
+    }
   }
+  else {
+    // Grass
+    data._type = DecorationType::Grass;
+    scale *= 0.5;
+  }
+
+  data._scale = scale;
+  data._offsetX = offsetX;
+  data._offsetZ = offsetZ;
+  data._xRotDeg = rotX;
+  data._yRotDeg = rotY;
+  data._zRotDeg = rotZ;
 
   return data;
 }

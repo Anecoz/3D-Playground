@@ -70,9 +70,19 @@ void InstancedModel::setCenter(const glm::vec3& center)
   _center = center;
 }
 
-glm::vec3 InstancedModel::getCenter()
+void InstancedModel::setBoundingBox(Box3D&& box)
+{
+  _boundingBox = std::move(box);
+}
+
+const glm::vec3& InstancedModel::getCenter()
 {
   return _center;
+}
+
+const Box3D& InstancedModel::getBoundingBox()
+{
+  return _boundingBox;
 }
 
 void InstancedModel::draw(const Camera& camera)

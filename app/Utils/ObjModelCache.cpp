@@ -14,6 +14,7 @@ void ObjModelCache::cacheModel(const std::string& objPath, CachedModelType type)
 
   OBJData data;
   if (OBJLoader::loadFromFile(objPath, directory, data)) {
+    printf("Cached model, %zu verts and %zu indices\n", data._vertices.size(), data._indices.size());
     _cachedData[type] = std::move(data);
   }
 }

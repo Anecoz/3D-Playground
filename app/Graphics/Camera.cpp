@@ -23,12 +23,16 @@ Camera::Camera(const glm::vec3& initialPosition)
 
 bool Camera::insideFrustum(const glm::vec3& point) const
 {
-  return _frustum.isInside(point) == (Frustum::Visibility::Partially || Frustum::Visibility::Completly);
+  auto inside = _frustum.isInside(point);
+  if (inside == Frustum::Visibility::Partially || inside == Frustum::Visibility::Completly) {
+    return true;
+  }
+  return false;
 }
 
 bool Camera::insideFrustum(const Box3D& box) const
 {
-  bool inside = _frustum.isInside(box);
+  auto inside = _frustum.isInside(box);
   if (inside == Frustum::Visibility::Partially || inside == Frustum::Visibility::Completly) {
     return true;
   }

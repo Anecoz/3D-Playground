@@ -2,6 +2,7 @@
 
 #include "../Utils/ObjModelCache.h"
 #include "Lowlevel/Shader.h"
+#include "Box3D.h"
 
 #include <glm/glm.hpp>
 
@@ -24,10 +25,13 @@ public:
   void setNumInstances(std::size_t numInstances);
   void setRotation(float xDeg, float yDeg, float zDeg);
   void setCenter(const glm::vec3& center);
+  void setBoundingBox(Box3D&& box);
 
-  glm::vec3 getCenter();
+  const glm::vec3& getCenter();
+  const Box3D& getBoundingBox();
 
 private:
+  Box3D _boundingBox;
   glm::vec3 _center;
   std::size_t _numInstances;
   Shader _shader;

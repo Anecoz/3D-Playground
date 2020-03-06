@@ -12,11 +12,11 @@ in vec3 fragPosition;
 #define BASE_COL_GRASS vec3(91.0/255.0, 255.0/255.0, 26.0/255.0)
 #define ALT_COL_GRASS vec3(222.0/255.0, 213.0/255.0, 47.0/255.0)
 #define BASE_COL_MOUNTAIN vec3(196.0/255.0, 187.0/255.0, 182.0/255.0)
-#define BASE_COL_WATER vec3(37.0/255.0, 17.0/255.0, 255.0/255.0)
+#define BASE_COL_MUD vec3(133.0/255.0, 99.0/255.0, 11.0/255.0)
 
 vec3 calcColor(float height, float angle) {
   if (height < -25.0) {
-    return BASE_COL_WATER;
+    return BASE_COL_MUD;
   }
   if (angle > M_PI/5.0) {
     return BASE_COL_MOUNTAIN;
