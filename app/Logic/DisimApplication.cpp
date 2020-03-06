@@ -25,6 +25,7 @@ DisimApplication::DisimApplication()
   ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_rock_2.obj", CachedModelType::SmallRock);
   ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_tree.obj", CachedModelType::Tree);
   ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_pine.obj", CachedModelType::Tree2);
+  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_tree_3.obj", CachedModelType::Tree3);
   ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_bridge.obj", CachedModelType::Bridge);
 
   glEnable(GL_BLEND);

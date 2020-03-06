@@ -14,6 +14,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/euler_angles.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 
 #include <noise/noise.h>
 #include <noise/noiseutils.h>
@@ -120,6 +121,9 @@ void GridGenerator::update(const Camera& camera, double delta, std::vector<Grid*
         if (decorationData._type == DecorationType::Tree2) {
           model = new InstancedModel(CachedModelType::Tree2);          
         }
+        if (decorationData._type == DecorationType::Tree3) {
+          model = new InstancedModel(CachedModelType::Tree3);          
+        }
         if (decorationData._type == DecorationType::SmallRock) {
           model = new InstancedModel(CachedModelType::SmallRock);          
         }
@@ -182,6 +186,26 @@ void GridGenerator::update(const Camera& camera, double delta, std::vector<Grid*
 
 void GridGenerator::GridData::addDecorationData(DecorationType type, glm::mat4&& matrix, glm::vec3&& position)
 {
+  if (position.y <= g_WaterHeight) return;
+
+  // Do some collision detection, no 2 decorations should be in same place.
+  if (type == DecorationType::Tree2 || type == DecorationType::Tree || type == DecorationType::Tree3) {
+    for (auto& data: _decorationData) {
+      for (auto& matrix: data._matrices) {
+        glm::vec3 scale;
+        glm::quat rotation;
+        glm::vec3 translation;
+        glm::vec3 skew;
+        glm::vec4 perspective;
+        glm::decompose(matrix, scale, rotation, translation, skew, perspective);
+
+        if (glm::distance(translation, position) < 10.0) {
+          return;
+        }
+      }
+    }
+  }  
+
   auto it = std::find_if(_decorationData.begin(), _decorationData.end(), [type](const GridDecorationData& data) {
     return data._type == type;
   });

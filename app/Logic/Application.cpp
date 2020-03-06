@@ -90,7 +90,7 @@ void Application::run()
 
 void Application::initWindowHandle()
 {
-	glfwWindowHint(GLFW_SAMPLES, 4);
+	//glfwWindowHint(GLFW_SAMPLES, 8);
 	//glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
 	_window = glfwCreateWindow(1920, 1080, "Disim", NULL, NULL);
@@ -102,7 +102,7 @@ void Application::initWindowHandle()
 	}
 
 	glfwMakeContextCurrent(_window);
-	glfwSwapInterval(1); // Vsync or not
+	glfwSwapInterval(0); // Vsync or not
 
 	// Set input callbacks
   glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);

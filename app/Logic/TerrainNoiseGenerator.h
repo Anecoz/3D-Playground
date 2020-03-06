@@ -10,7 +10,8 @@ enum class DecorationType
   Rock,
   SmallRock,
   Tree,
-  Tree2
+  Tree2,
+  Tree3
 };
 
 struct DecorationData

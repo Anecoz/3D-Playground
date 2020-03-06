@@ -9,6 +9,7 @@ enum class CachedModelType
 {
   Tree,
   Tree2,
+  Tree3,
   Rock,
   SmallRock,
   Grass,

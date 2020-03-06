@@ -341,6 +341,12 @@ DecorationData NoiseGenerator::getDecorationDataAt(int x, int z)
     if (height > -13.5 && height < -11.5) {
       data._type = DecorationType::Tree;
     }
+    else if (height > -11.5 && height < -10.0) {
+      data._type = DecorationType::Tree2;
+    }
+    else if (height > -10.0 && height < -8.0) {
+      data._type = DecorationType::Tree3;
+    }
     else if (height > 15.0) {
       data._type = DecorationType::Rock;
     }
