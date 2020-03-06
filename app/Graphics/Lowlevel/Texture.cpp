@@ -13,14 +13,17 @@ Texture::Texture(const std::string& path)
 	_texId = GraphicsUtils::loadPNGToTexture(path.c_str(), &_width, &_height);
 }
 
-Texture::~Texture() {
+Texture::~Texture()
+{
   glDeleteTextures(1, &_texId);
 }
 
-void Texture::bind() {
+void Texture::bind() const
+{
 	glBindTexture(_type, _texId);
 }
 
-void Texture::unbind() {
+void Texture::unbind() const
+{
 	glBindTexture(_type, 0);
 }

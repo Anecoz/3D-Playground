@@ -6,13 +6,14 @@
 class Texture
 {
 public:
+  Texture() = default;
 	Texture(unsigned width, unsigned height, GLuint id, GLint type);
 	Texture(const std::string& path);
 
 	~Texture();
 
-	void bind();
-	void unbind();
+	void bind() const;
+	void unbind() const;
 
 	unsigned getWidth() { return _width; }
 	unsigned getHeight() { return _height; }

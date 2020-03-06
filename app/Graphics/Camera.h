@@ -4,19 +4,30 @@
 
 #include <glm/glm.hpp>
 
+enum class ProjectionType
+{
+  Perspective,
+  Orthogonal
+};
+
 class Camera
 {
 public:
-	Camera(const glm::vec3& initialPosition);
+	Camera(const glm::vec3& initialPosition, ProjectionType type);
 	~Camera() = default;
 
 	void update(double delta);
+  void updateFrustum();
+  void updateViewMatrix();
 
-	void setPosition(const glm::vec3& posIn) { _position = posIn; }
+	void setPosition(const glm::vec3& posIn);
+  void setYawPitchRoll(double yawDeg, double pitchDeg, double rollDeg);
+  void setViewMatrix(const glm::mat4& matrix);
 	glm::vec3 getPosition() const { return _position; }
   glm::mat4 getProjection() const { return _projection; }
   glm::mat4 getCamMatrix() const { return _cameraMatrix; }
   glm::mat4 getCombined() const { return _projection * _cameraMatrix; }
+  glm::vec3 getForward() const { return _forward; }
 
   bool insideFrustum(const glm::vec3& point) const;
   bool insideFrustum(const Box3D& box) const;

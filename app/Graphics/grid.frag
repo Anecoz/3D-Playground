@@ -3,9 +3,11 @@
 layout (location = 0) out vec4 outColor;
 
 uniform vec3 cameraPos;
+uniform sampler2D shadowMap;
 
 flat in vec3 fragNormal;
 in vec3 fragPosition;
+in vec4 fragShadowSpacePosition;
 
 #define M_PI 3.1415926535897932384626433832795
 
@@ -13,6 +15,26 @@ in vec3 fragPosition;
 #define ALT_COL_GRASS vec3(222.0/255.0, 213.0/255.0, 47.0/255.0)
 #define BASE_COL_MOUNTAIN vec3(196.0/255.0, 187.0/255.0, 182.0/255.0)
 #define BASE_COL_MUD vec3(133.0/255.0, 99.0/255.0, 11.0/255.0)
+
+float shadowCalc() {
+  vec3 projCoords = fragShadowSpacePosition.xyz / fragShadowSpacePosition.w;
+  // transform to [0,1] range
+  projCoords = projCoords * 0.5 + 0.5;
+  if (projCoords.x > 1.0 || projCoords.x < 0.0 ||
+      projCoords.z > 1.0 || projCoords.z < 0.0) {
+    return 0.0;
+  }
+  // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+  float closestDepth = texture(shadowMap, projCoords.xy).r;
+  // get depth of current fragment from light's perspective
+  float currentDepth = projCoords.z;
+
+  // check whether current frag pos is in shadow
+  float bias = 0.005;
+  float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
+
+  return shadow;
+}
 
 vec3 calcColor(float height, float angle) {
   if (height < -25.0) {
@@ -26,6 +48,13 @@ vec3 calcColor(float height, float angle) {
   }
   //return ALT_COL_GRASS;
   return clamp(mix(BASE_COL_GRASS, ALT_COL_GRASS, angle/(M_PI/6.0)), BASE_COL_GRASS, ALT_COL_GRASS);
+}
+
+float toLinearDepth(float zDepth)
+{
+  float near = 0.1;
+  float far = 1000.0;
+  return 2.0 * near * far / (far + near - (2.0 * zDepth - 1.0) * (far - near));
 }
 
 void main() {
@@ -55,10 +84,10 @@ void main() {
   float spec = pow(max(dot(viewDir, reflectDir), 0.0), 324);
   vec3 specular = 0.1 * spec * specColor;
 
-  vec3 result = (ambient + diffuse + specular);
+  float shadow = shadowCalc();
+  vec3 result = ambient + (1.0 - shadow) * (diffuse + specular);
 
   float gamma = 1.8;
   result = pow(result, vec3(1.0/gamma));
-
   outColor = vec4(result, 1.0);
 }

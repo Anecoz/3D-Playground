@@ -20,6 +20,7 @@ public:
   ~InstancedModel();
 
   void draw(const Camera& camera);
+  void drawShadowPass(const Camera& shadowCamera);
 
   void setInstanceMatrices(std::vector<glm::mat4>&& offsets);
   void setNumInstances(std::size_t numInstances);
@@ -35,6 +36,7 @@ private:
   glm::vec3 _center;
   std::size_t _numInstances;
   Shader _shader;
+  Shader _shadowShader;
   std::unique_ptr<IndexedVertexArray> _mesh;
   glm::mat4 _modelMatrix;
 };

@@ -7,6 +7,7 @@
 #include "../Graphics/InstancedModel.h"
 #include "../Graphics/Camera.h"
 #include "../Graphics/Grid.h"
+#include "../Graphics/ShadowMapGenerator.h"
 
 #include <vector>
 
@@ -27,4 +28,5 @@ private:
   TerrainCollisionHandler _terrainCollisionHandler;
   GridGenerator _gridGenerator;
   DecorationGenerator _decorationGenerator;
+  ShadowMapGenerator _shadowGenerator;
 };

@@ -47,8 +47,10 @@ Grid::Grid(
   , _waterShader(
     "/home/christoph/dev/3D-Playground/app/Graphics/water.vert",
     "/home/christoph/dev/3D-Playground/app/Graphics/water.geom",
-    "/home/christoph/dev/3D-Playground/app/Graphics/water.frag"
-  )
+    "/home/christoph/dev/3D-Playground/app/Graphics/water.frag")
+  , _shadowShader(
+    "/home/christoph/dev/3D-Playground/app/Graphics/shadow.vert",
+    "/home/christoph/dev/3D-Playground/app/Graphics/shadow.frag")
   , _models(std::move(models))
 {
   unsigned numVerts = (_size + 1) * (_size + 1) * 3;
@@ -62,6 +64,9 @@ Grid::Grid(
     delete[] waterVerts;
     delete[] waterIndices;
   }
+
+  glActiveTexture(GL_TEXTURE0);
+  _shadowShader.uploadInt(0, "shadowMap");
 }
 
 Grid::~Grid()
@@ -102,13 +107,15 @@ std::size_t Grid::getSize() const
   return _size;
 }
 
-void Grid::draw(const Camera& camera)
+void Grid::draw(const Camera& camera, const Texture& shadowMap, const glm::mat4& shadowMatrix)
 {
   for (auto& model: _models) {
     if (camera.insideFrustum(model->getBoundingBox())) {
       model->draw(camera);
     }
   }
+
+  shadowMap.bind();
 
   _modelMatrix = glm::translate(_position);
 
@@ -117,8 +124,28 @@ void Grid::draw(const Camera& camera)
   _shader.uploadMatrix(camera.getCamMatrix(), "camMatrix");
   _shader.uploadMatrix(camera.getProjection(), "projMatrix");
   _shader.uploadMatrix(_modelMatrix, "modelMatrix");
+  _shader.uploadMatrix(shadowMatrix, "shadowMatrix");
   _mesh->draw();
   _shader.unbind();
+}
+
+void Grid::drawShadowPass(const Camera& shadowCamera)
+{
+  for (auto& model: _models) {
+    //if (camera.insideFrustum(model->getBoundingBox())) {
+      model->drawShadowPass(shadowCamera);
+    //}
+  }
+
+  _modelMatrix = glm::translate(_position);
+
+  _shadowShader.bind();
+  _shadowShader.uploadVec(shadowCamera.getPosition(), "camPosition");
+  _shadowShader.uploadMatrix(shadowCamera.getCamMatrix(), "camMatrix");
+  _shadowShader.uploadMatrix(shadowCamera.getProjection(), "projMatrix");
+  _shadowShader.uploadMatrix(_modelMatrix, "modelMatrix");
+  _mesh->draw();
+  _shadowShader.unbind();
 }
 
 void Grid::drawWater(const Camera& camera)

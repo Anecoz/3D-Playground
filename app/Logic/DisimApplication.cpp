@@ -14,7 +14,7 @@
 #include <iostream>
 
 DisimApplication::DisimApplication()
-  : _camera(glm::vec3(10000.0, 500.0, 10000.0))
+  : _camera(glm::vec3(10000.0, 500.0, 10000.0), ProjectionType::Perspective)
   , _gridGenerator(10)
 {
   //std::cout << "Setting wireframe" << std::endl;
@@ -53,15 +53,28 @@ DisimApplication::DisimApplication()
   _testModel->setInstanceMatrices({translation * rot * scale});
 }
 
+static glm::vec3 g_sunDirection = glm::normalize(glm::vec3(-0.7f, -0.7f, -0.7f));
+
 void DisimApplication::render()
 {
+  // Shadow pass first
+  const Camera& shadowCam = _shadowGenerator.prepareShadowPass(_camera, g_sunDirection);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  for (auto grid: _currentGrids) {
+    //if (_camera.insideFrustum(grid->getBoundingBox())) {
+      grid->drawShadowPass(shadowCam);
+    //}
+  }
+
+  _shadowGenerator.endShadowPass();
+  const Texture& shadowMap = _shadowGenerator.getShadowTexture();
+
+  // Normal, post-shadow pass
   for (auto grid: _currentGrids) {
     if (_camera.insideFrustum(grid->getBoundingBox())) {
-      grid->draw(_camera);
+      grid->draw(_camera, shadowMap, shadowCam.getCombined());
     }
-    /*else {
-      printf("Skipping grid\n");
-    }*/
   }
 
   // Draw water after everything else, so blending works

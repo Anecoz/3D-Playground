@@ -10,7 +10,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/transform.hpp>
 
-Camera::Camera(const glm::vec3& initialPosition)
+Camera::Camera(const glm::vec3& initialPosition, ProjectionType type)
   : _yaw(0.0)
   , _pitch(0.0)
   , _roll(0.0)
@@ -19,7 +19,11 @@ Camera::Camera(const glm::vec3& initialPosition)
   , _position(initialPosition)
   , _forward(0.0f, 0.0f, 0.0f)
   , _cameraMatrix(glm::lookAt(_position, _forward, _up))
-{}
+{
+  if (type == ProjectionType::Orthogonal) {
+    _projection = glm::ortho(-100.0, 100.0, -100.0, 100.0, 1.0, 100.0);
+  }
+}
 
 bool Camera::insideFrustum(const glm::vec3& point) const
 {
@@ -40,6 +44,47 @@ bool Camera::insideFrustum(const Box3D& box) const
   return false;
 }
 
+void Camera::updateFrustum()
+{
+  _frustum.transform(_projection, _cameraMatrix);
+}
+
+void Camera::updateViewMatrix()
+{
+  glm::mat4 view = glm::translate(_position);
+  view *= glm::rotate((float)_yaw, glm::vec3(0, 1, 0));
+  view *= glm::rotate((float)_pitch, glm::vec3(1, 0, 0));
+  _cameraMatrix = glm::inverse(view);
+
+  _right = glm::normalize(view[0]);
+  _up = glm::normalize(view[1]);
+  _forward = -glm::normalize(view[2]);
+}
+
+void Camera::setPosition(const glm::vec3& posIn)
+{
+  _position = posIn;
+  updateViewMatrix();
+  updateFrustum();
+}
+
+void Camera::setYawPitchRoll(double yawDeg, double pitchDeg, double rollDeg)
+{
+  _yaw = glm::radians(yawDeg);
+  _pitch = glm::radians(pitchDeg);
+  _roll = glm::radians(rollDeg);
+
+  updateViewMatrix();
+  updateFrustum();
+}
+
+void Camera::setViewMatrix(const glm::mat4& viewMatrix) 
+{
+  // TODO: Fix names
+  _cameraMatrix = viewMatrix;
+  updateFrustum();
+}
+
 void Camera::update(double delta)
 {
   if (_firstMouse) {
@@ -52,22 +97,14 @@ void Camera::update(double delta)
   // Check input and move camera
   freelookUpdate(delta);
 
-  _frustum.transform(_projection, _cameraMatrix);
+  updateViewMatrix();
+  updateFrustum();
   //std::cout << "Camera at: " << _position.x << ", " << _position.y << ", " << _position.z << std::endl;
 }
 
 void Camera::freelookUpdate(double delta)
 {
   handleFreelookInput(delta);
-
-  glm::mat4 view = glm::translate(_position);
-  view *= glm::rotate((float)_yaw, glm::vec3(0, 1, 0));
-  view *= glm::rotate((float)_pitch, glm::vec3(1, 0, 0));
-  _cameraMatrix = glm::inverse(view);
-
-  _right = glm::normalize(view[0]);
-  _up = glm::normalize(view[1]);
-  _forward = -glm::normalize(view[2]);
 }
 
 void Camera::handleFreelookInput(double delta)

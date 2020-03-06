@@ -17,6 +17,9 @@ InstancedModel::InstancedModel(CachedModelType type)
       "/home/christoph/dev/3D-Playground/app/Graphics/instancedmodel.vert",
       "/home/christoph/dev/3D-Playground/app/Graphics/instancedmodel.geom",
       "/home/christoph/dev/3D-Playground/app/Graphics/instancedmodel.frag")
+  ,  _shadowShader(
+      "/home/christoph/dev/3D-Playground/app/Graphics/modelShadow.vert",
+      "/home/christoph/dev/3D-Playground/app/Graphics/shadow.frag")
   , _mesh(nullptr)
   , _modelMatrix(glm::scale(glm::vec3(1.0)))
 {
@@ -101,4 +104,22 @@ void InstancedModel::draw(const Camera& camera)
   _mesh->drawInstanced(_numInstances);
 
   _shader.unbind();
+}
+
+void InstancedModel::drawShadowPass(const Camera& shadowCamera)
+{
+  if (!_mesh) {
+    printf("InstancedModel: No mesh, not drawing\n");
+    return;
+  }
+
+  _shadowShader.bind();
+  _shadowShader.uploadMatrix(_modelMatrix, "modelMatrix");
+  _shadowShader.uploadMatrix(shadowCamera.getCamMatrix(), "camMatrix");
+  _shadowShader.uploadMatrix(shadowCamera.getProjection(), "projMatrix");
+  _shadowShader.uploadVec(shadowCamera.getPosition(), "cameraPos");
+
+  _mesh->drawInstanced(_numInstances);
+
+  _shadowShader.unbind();
 }
