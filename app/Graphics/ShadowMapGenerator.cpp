@@ -4,9 +4,9 @@
 #include <glm/gtx/transform.hpp>
 
 ShadowMapGenerator::ShadowMapGenerator()
-  : _shadowFbo(8192, 8192, true, true)
+  : _shadowFbo(4096, 4096, true, true)
   , _shadowCamera(glm::vec3(0.0, 0.0, 0.0), ProjectionType::Orthogonal)
-  , _shadowTexture(8192, 8192, _shadowFbo.getDepthTextureId(), GL_TEXTURE_2D)
+  , _shadowTexture(4096, 4096, _shadowFbo.getDepthTextureId(), GL_TEXTURE_2D)
 {}
 
 ShadowMapGenerator::~ShadowMapGenerator()
