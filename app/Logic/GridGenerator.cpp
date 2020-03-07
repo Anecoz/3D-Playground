@@ -20,7 +20,7 @@
 #include <noise/noiseutils.h>
 
 const double g_WaterHeight = -18.0;
-const std::size_t g_ExtraGrids = 3;
+const int g_ExtraGrids = 3;
 
 GridGenerator::GridGenerator()
   : _numWorkers(4)
@@ -48,8 +48,8 @@ GridGenerator::~GridGenerator()
 void GridGenerator::update(const Camera& camera, double delta, std::vector<Grid*>& activeGrids)
 {
   // Any new work to do?
-  int camxIdx = static_cast<int>(camera.getPosition().x) / _gridSize;
-  int camzIdx = static_cast<int>(camera.getPosition().z) / _gridSize;
+  int camxIdx = static_cast<int>(camera.getPosition().x) / static_cast<int>(_gridSize);
+  int camzIdx = static_cast<int>(camera.getPosition().z) / static_cast<int>(_gridSize);
 
   for (int xIdx = camxIdx - g_ExtraGrids; xIdx <= camxIdx + g_ExtraGrids; ++xIdx) {
     for (int zIdx = camzIdx - g_ExtraGrids; zIdx <= camzIdx + g_ExtraGrids; ++zIdx) {
