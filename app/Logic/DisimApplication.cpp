@@ -3,6 +3,7 @@
 #include "../Graphics/Box3D.h"
 #include "../Utils/GraphicsUtils.h"
 #include "../Utils/ObjModelCache.h"
+#include "../Utils/ShaderCache.h"
 
 #include <GLFW/glfw3.h>
 
@@ -20,13 +21,7 @@ DisimApplication::DisimApplication()
   //std::cout << "Setting wireframe" << std::endl;
   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_grass.obj", CachedModelType::Grass);
-  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_rock.obj", CachedModelType::Rock);
-  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_rock_2.obj", CachedModelType::SmallRock);
-  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_tree.obj", CachedModelType::Tree);
-  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_pine.obj", CachedModelType::Tree2);
-  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_tree_3.obj", CachedModelType::Tree3);
-  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_bridge.obj", CachedModelType::Bridge);
+  fillCaches();
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -52,6 +47,42 @@ DisimApplication::DisimApplication()
   _testModel->setCenter(avg);
   _testModel->setNumInstances(1);
   _testModel->setInstanceMatrices({translation * rot * scale});
+}
+
+void DisimApplication::fillCaches()
+{
+  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_grass.obj", CachedModelType::Grass);
+  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_rock.obj", CachedModelType::Rock);
+  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_rock_2.obj", CachedModelType::SmallRock);
+  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_tree.obj", CachedModelType::Tree);
+  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_pine.obj", CachedModelType::Tree2);
+  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_tree_3.obj", CachedModelType::Tree3);
+  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_bridge.obj", CachedModelType::Bridge);
+
+  Shader gridShader(
+    "/home/christoph/dev/3D-Playground/app/Graphics/grid.vert",
+    "/home/christoph/dev/3D-Playground/app/Graphics/grid.geom",
+    "/home/christoph/dev/3D-Playground/app/Graphics/grid.frag");
+  Shader waterShader(
+    "/home/christoph/dev/3D-Playground/app/Graphics/water.vert",
+    "/home/christoph/dev/3D-Playground/app/Graphics/water.geom",
+    "/home/christoph/dev/3D-Playground/app/Graphics/water.frag");
+  Shader gridShadowShader(
+    "/home/christoph/dev/3D-Playground/app/Graphics/shadow.vert",
+    "/home/christoph/dev/3D-Playground/app/Graphics/shadow.frag");
+  Shader instancedModelShader(
+    "/home/christoph/dev/3D-Playground/app/Graphics/instancedmodel.vert",
+    "/home/christoph/dev/3D-Playground/app/Graphics/instancedmodel.geom",
+    "/home/christoph/dev/3D-Playground/app/Graphics/instancedmodel.frag");
+  Shader instancedModelShadowShader(
+    "/home/christoph/dev/3D-Playground/app/Graphics/modelShadow.vert",
+    "/home/christoph/dev/3D-Playground/app/Graphics/shadow.frag");
+
+  ShaderCache::addShader(std::move(gridShader), ShaderType::Grid);
+  ShaderCache::addShader(std::move(waterShader), ShaderType::Water);
+  ShaderCache::addShader(std::move(gridShadowShader), ShaderType::ShadowGrid);
+  ShaderCache::addShader(std::move(instancedModelShader), ShaderType::InstancedModel);
+  ShaderCache::addShader(std::move(instancedModelShadowShader), ShaderType::ShadowInstancedModel);
 }
 
 static glm::vec3 g_sunDirection = glm::normalize(glm::vec3(-0.7f, -0.7f, -0.7f));

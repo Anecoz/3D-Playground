@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../Utils/ObjModelCache.h"
-#include "Lowlevel/Shader.h"
 #include "Box3D.h"
 
 #include <glm/glm.hpp>
@@ -35,8 +34,6 @@ private:
   Box3D _boundingBox;
   glm::vec3 _center;
   std::size_t _numInstances;
-  Shader _shader;
-  Shader _shadowShader;
   std::unique_ptr<IndexedVertexArray> _mesh;
   glm::mat4 _modelMatrix;
 };

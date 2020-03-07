@@ -21,6 +21,8 @@ public:
   void update(double delta) override;
 
 private:
+  void fillCaches();
+
   InstancedModel* _testModel;
 
   std::vector<Grid*> _currentGrids;

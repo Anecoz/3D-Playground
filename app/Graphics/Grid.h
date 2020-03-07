@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Lowlevel/Shader.h"
 #include "Lowlevel/Texture.h"
 #include "Box3D.h"
 
@@ -53,9 +52,6 @@ private:
   glm::mat4 _modelMatrix;
   std::unique_ptr<IndexedVertexArray> _mesh;
   std::unique_ptr<IndexedVertexArray> _waterMesh;
-  Shader _shader;
-  Shader _waterShader;
-  Shader _shadowShader;
 
   std::vector<std::unique_ptr<InstancedModel>> _models;
 };

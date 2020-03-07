@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "Lowlevel/IndexedVertexArray.h"
 #include "../Utils/OBJLoader.h"
+#include "../Utils/ShaderCache.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/transform.hpp>
@@ -13,13 +14,6 @@
 InstancedModel::InstancedModel(CachedModelType type)
   :  _center(0.0, 0.0, 0.0)
   ,  _numInstances(1)
-  ,  _shader(
-      "/home/christoph/dev/3D-Playground/app/Graphics/instancedmodel.vert",
-      "/home/christoph/dev/3D-Playground/app/Graphics/instancedmodel.geom",
-      "/home/christoph/dev/3D-Playground/app/Graphics/instancedmodel.frag")
-  ,  _shadowShader(
-      "/home/christoph/dev/3D-Playground/app/Graphics/modelShadow.vert",
-      "/home/christoph/dev/3D-Playground/app/Graphics/shadow.frag")
   , _mesh(nullptr)
   , _modelMatrix(glm::scale(glm::vec3(1.0)))
 {
@@ -95,15 +89,14 @@ void InstancedModel::draw(const Camera& camera)
     return;
   }
 
-  _shader.bind();
-  _shader.uploadMatrix(_modelMatrix, "modelMatrix");
-  _shader.uploadMatrix(camera.getCamMatrix(), "camMatrix");
-  _shader.uploadMatrix(camera.getProjection(), "projMatrix");
-  _shader.uploadVec(camera.getPosition(), "cameraPos");
-
+  const auto& shader = ShaderCache::getShader(ShaderType::InstancedModel);
+  shader.bind();
+  shader.uploadMatrix(_modelMatrix, "modelMatrix");
+  shader.uploadMatrix(camera.getCamMatrix(), "camMatrix");
+  shader.uploadMatrix(camera.getProjection(), "projMatrix");
+  shader.uploadVec(camera.getPosition(), "cameraPos");
   _mesh->drawInstanced(_numInstances);
-
-  _shader.unbind();
+  shader.unbind();
 }
 
 void InstancedModel::drawShadowPass(const Camera& shadowCamera)
@@ -113,13 +106,12 @@ void InstancedModel::drawShadowPass(const Camera& shadowCamera)
     return;
   }
 
-  _shadowShader.bind();
-  _shadowShader.uploadMatrix(_modelMatrix, "modelMatrix");
-  _shadowShader.uploadMatrix(shadowCamera.getCamMatrix(), "camMatrix");
-  _shadowShader.uploadMatrix(shadowCamera.getProjection(), "projMatrix");
-  _shadowShader.uploadVec(shadowCamera.getPosition(), "cameraPos");
-
+  const auto& shadowShader = ShaderCache::getShader(ShaderType::ShadowInstancedModel);
+  shadowShader.bind();
+  shadowShader.uploadMatrix(_modelMatrix, "modelMatrix");
+  shadowShader.uploadMatrix(shadowCamera.getCamMatrix(), "camMatrix");
+  shadowShader.uploadMatrix(shadowCamera.getProjection(), "projMatrix");
+  shadowShader.uploadVec(shadowCamera.getPosition(), "cameraPos");
   _mesh->drawInstanced(_numInstances);
-
-  _shadowShader.unbind();
+  shadowShader.unbind();
 }

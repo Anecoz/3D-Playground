@@ -10,16 +10,13 @@
 #include "InstancedModel.h"
 #include "Lowlevel/IndexedVertexArray.h"
 #include "../Utils/GraphicsUtils.h"
+#include "../Utils/ShaderCache.h"
 
 Grid::Grid()
   : _position(0.0, 0.0, 0.0)
   , _size(512)
   , _modelMatrix(glm::scale(glm::vec3(1.0)))
   , _mesh(nullptr)
-  , _shader(
-    "/home/christoph/dev/3D-Playground/app/Graphics/grid.vert",
-    "/home/christoph/dev/3D-Playground/app/Graphics/grid.geom",
-    "/home/christoph/dev/3D-Playground/app/Graphics/grid.frag")
 {}
 
 Grid::Grid(
@@ -40,17 +37,6 @@ Grid::Grid(
   , _boundingBox(boundingBox)
   , _modelMatrix(glm::scale(glm::vec3(1.0)))
   , _mesh(nullptr)
-  , _shader(
-    "/home/christoph/dev/3D-Playground/app/Graphics/grid.vert",
-    "/home/christoph/dev/3D-Playground/app/Graphics/grid.geom",
-    "/home/christoph/dev/3D-Playground/app/Graphics/grid.frag")
-  , _waterShader(
-    "/home/christoph/dev/3D-Playground/app/Graphics/water.vert",
-    "/home/christoph/dev/3D-Playground/app/Graphics/water.geom",
-    "/home/christoph/dev/3D-Playground/app/Graphics/water.frag")
-  , _shadowShader(
-    "/home/christoph/dev/3D-Playground/app/Graphics/shadow.vert",
-    "/home/christoph/dev/3D-Playground/app/Graphics/shadow.frag")
   , _models(std::move(models))
 {
   unsigned numVerts = (_size + 1) * (_size + 1) * 3;
@@ -64,9 +50,6 @@ Grid::Grid(
     delete[] waterVerts;
     delete[] waterIndices;
   }
-
-  glActiveTexture(GL_TEXTURE0);
-  _shadowShader.uploadInt(0, "shadowMap");
 }
 
 Grid::~Grid()
@@ -119,14 +102,15 @@ void Grid::draw(const Camera& camera, const Texture& shadowMap, const glm::mat4&
 
   _modelMatrix = glm::translate(_position);
 
-  _shader.bind();
-  _shader.uploadVec(camera.getPosition(), "cameraPos");
-  _shader.uploadMatrix(camera.getCamMatrix(), "camMatrix");
-  _shader.uploadMatrix(camera.getProjection(), "projMatrix");
-  _shader.uploadMatrix(_modelMatrix, "modelMatrix");
-  _shader.uploadMatrix(shadowMatrix, "shadowMatrix");
+  const auto& shader = ShaderCache::getShader(ShaderType::Grid);
+  shader.bind();
+  shader.uploadVec(camera.getPosition(), "cameraPos");
+  shader.uploadMatrix(camera.getCamMatrix(), "camMatrix");
+  shader.uploadMatrix(camera.getProjection(), "projMatrix");
+  shader.uploadMatrix(_modelMatrix, "modelMatrix");
+  shader.uploadMatrix(shadowMatrix, "shadowMatrix");
   _mesh->draw();
-  _shader.unbind();
+  shader.unbind();
 }
 
 void Grid::drawShadowPass(const Camera& shadowCamera)
@@ -139,27 +123,29 @@ void Grid::drawShadowPass(const Camera& shadowCamera)
 
   _modelMatrix = glm::translate(_position);
 
-  _shadowShader.bind();
-  _shadowShader.uploadVec(shadowCamera.getPosition(), "camPosition");
-  _shadowShader.uploadMatrix(shadowCamera.getCamMatrix(), "camMatrix");
-  _shadowShader.uploadMatrix(shadowCamera.getProjection(), "projMatrix");
-  _shadowShader.uploadMatrix(_modelMatrix, "modelMatrix");
+  const auto& shadowShader = ShaderCache::getShader(ShaderType::ShadowGrid);
+  shadowShader.bind();
+  shadowShader.uploadVec(shadowCamera.getPosition(), "camPosition");
+  shadowShader.uploadMatrix(shadowCamera.getCamMatrix(), "camMatrix");
+  shadowShader.uploadMatrix(shadowCamera.getProjection(), "projMatrix");
+  shadowShader.uploadMatrix(_modelMatrix, "modelMatrix");
   _mesh->draw();
-  _shadowShader.unbind();
+  shadowShader.unbind();
 }
 
 void Grid::drawWater(const Camera& camera)
 {
   _modelMatrix = glm::translate(_position);
 
+  const auto& waterShader = ShaderCache::getShader(ShaderType::Water);
   if (_containsWater) {
-    _waterShader.bind();
-    _waterShader.uploadVec(camera.getPosition(), "cameraPos");
-    _waterShader.uploadMatrix(camera.getCamMatrix(), "camMatrix");
-    _waterShader.uploadMatrix(camera.getProjection(), "projMatrix");
-    _waterShader.uploadMatrix(_modelMatrix, "modelMatrix");
-    _waterShader.uploadFloat((float)glfwGetTime(), "time");
+    waterShader.bind();
+    waterShader.uploadVec(camera.getPosition(), "cameraPos");
+    waterShader.uploadMatrix(camera.getCamMatrix(), "camMatrix");
+    waterShader.uploadMatrix(camera.getProjection(), "projMatrix");
+    waterShader.uploadMatrix(_modelMatrix, "modelMatrix");
+    waterShader.uploadFloat((float)glfwGetTime(), "time");
     _waterMesh->draw();
-    _waterShader.unbind();
+    waterShader.unbind();
   }
 }
