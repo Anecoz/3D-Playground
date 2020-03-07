@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -47,6 +48,10 @@ public:
 	void uploadMatrix(const glm::mat4& mat, const std::string& name) const;
 
 private:
-	GLuint _id;
+  GLint getUniformLocation(const std::string& name) const;
+
+  GLuint _id;
+
+  mutable std::map<std::string, GLint> _uniformLocationCache;
 };
 
