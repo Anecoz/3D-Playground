@@ -53,13 +53,13 @@ void NoiseGenerator::buildHeightMap()
   mountainTerrain.SetScale(1.0);
   mountainTerrain.SetBias(2.0);
 
-  module::Billow baseFlatTerrain;
+  module::Perlin baseFlatTerrain;
   baseFlatTerrain.SetFrequency (2.0);
   baseFlatTerrain.SetOctaveCount(2);
 
   module::ScaleBias flatTerrain;
   flatTerrain.SetSourceModule (0, baseFlatTerrain);
-  flatTerrain.SetScale (0.070);
+  flatTerrain.SetScale (0.25);
   flatTerrain.SetBias (-0.25);
 
   module::RidgedMulti river;
@@ -321,7 +321,7 @@ DecorationData NoiseGenerator::getDecorationDataAt(int x, int z)
     return data;
   }
 
-  // TEST
+  // For sparsity
   if (x % 6 != 0 || z % 6 != 0) {
     return data;
   }

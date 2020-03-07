@@ -37,7 +37,11 @@ float shadowCalc() {
 }
 
 vec3 calcColor(float height, float angle) {
-  if (height < -25.0) {
+  vec3 baseCol = clamp(mix(BASE_COL_GRASS, ALT_COL_GRASS, angle/(M_PI/6.0)), BASE_COL_GRASS, ALT_COL_GRASS);
+  float mixFactor = smoothstep(-18.0, -15.0, height);
+  baseCol = clamp(mix(BASE_COL_MUD, baseCol, mixFactor), BASE_COL_MUD, baseCol);
+
+  if (height < -18.0) {
     return BASE_COL_MUD;
   }
   if (angle > M_PI/5.0) {
@@ -47,7 +51,7 @@ vec3 calcColor(float height, float angle) {
     return clamp(mix(ALT_COL_GRASS, ALT_COL_GRASS, height/60.0), BASE_COL_MOUNTAIN, ALT_COL_GRASS);
   }
   //return ALT_COL_GRASS;
-  return clamp(mix(BASE_COL_GRASS, ALT_COL_GRASS, angle/(M_PI/6.0)), BASE_COL_GRASS, ALT_COL_GRASS);
+  return baseCol;
 }
 
 float toLinearDepth(float zDepth)

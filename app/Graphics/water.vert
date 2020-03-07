@@ -21,7 +21,7 @@ float offset(float x, float z, float val1, float val2, float waveLength) {
   float hiFreqSin = sin(M_PI * 0.3 * ((x * 10.0)/waveLength + time));
   float hiFreqCos = sin(M_PI * 0.3 * ((z * 10.0)/waveLength + time));
 
-  return 0.1 * (sin(sinVal) + cos(cosVal)) + 0.7 * (sin(slowSin) + cos(slowCos)) + 0.5 * (sin(hiFreqSin + cos(hiFreqCos)));
+  return 0.1 * (sin(sinVal) + cos(cosVal));// + 0.7 * (sin(slowSin) + cos(slowCos)) + 0.5 * (sin(hiFreqSin + cos(hiFreqCos)));
 }
 
 void main() {
