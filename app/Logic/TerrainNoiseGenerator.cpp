@@ -342,6 +342,7 @@ DecorationData NoiseGenerator::getDecorationDataAt(int x, int z)
       data._type = DecorationType::Tree;
     }
     else if (height > -11.5 && height < -10.0) {
+      scale *= 1.2;
       data._type = DecorationType::Tree2;
     }
     else if (height > -10.0 && height < -8.0) {
