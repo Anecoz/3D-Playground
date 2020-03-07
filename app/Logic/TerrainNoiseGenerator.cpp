@@ -54,8 +54,8 @@ void NoiseGenerator::buildHeightMap()
   mountainTerrain.SetBias(2.0);
 
   module::Perlin baseFlatTerrain;
-  baseFlatTerrain.SetFrequency (2.0);
-  baseFlatTerrain.SetOctaveCount(2);
+  baseFlatTerrain.SetFrequency (1.0);
+  baseFlatTerrain.SetOctaveCount(4);
 
   module::ScaleBias flatTerrain;
   flatTerrain.SetSourceModule (0, baseFlatTerrain);
@@ -348,11 +348,16 @@ DecorationData NoiseGenerator::getDecorationDataAt(int x, int z)
     else if (height > -10.0 && height < -8.0) {
       data._type = DecorationType::Tree3;
     }
+    else if (height > -8.0 && height < -5.0) {
+      scale *= 0.5;
+      data._type = DecorationType::SmallRock;
+    }
     else if (height > 15.0) {
       data._type = DecorationType::Rock;
     }
     else {
-      data._type = DecorationType::SmallRock;
+      scale *= 0.5;
+      data._type = DecorationType::Grass;
     }
   }
   else {
