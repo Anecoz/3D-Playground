@@ -5,6 +5,9 @@ file(GLOB_RECURSE src
 
 add_executable(rpg ${src})
 
+add_definitions(-DASSET_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
+add_definitions(-DSHADER_PATH="${CMAKE_CURRENT_SOURCE_DIR}/Graphics/")
+
 if (WIN32)
   add_definitions(-DGLEW_STATIC)
   target_link_libraries(rpg glfw glew ${OPENGL_gl_LIBRARY} glm libnoise noiseutils)

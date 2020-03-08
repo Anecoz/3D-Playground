@@ -51,32 +51,32 @@ DisimApplication::DisimApplication()
 
 void DisimApplication::fillCaches()
 {
-  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_grass.obj", CachedModelType::Grass);
-  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_rock.obj", CachedModelType::Rock);
-  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_rock_2.obj", CachedModelType::SmallRock);
-  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_tree.obj", CachedModelType::Tree);
-  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_pine.obj", CachedModelType::Tree2);
-  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_tree_3.obj", CachedModelType::Tree3);
-  ObjModelCache::cacheModel("/home/christoph/dev/3D-Playground/app/assets/low_poly_bridge.obj", CachedModelType::Bridge);
+  ObjModelCache::cacheModel(std::string(ASSET_PATH) + "low_poly_grass.obj", CachedModelType::Grass);
+  ObjModelCache::cacheModel(std::string(ASSET_PATH) + "low_poly_rock.obj", CachedModelType::Rock);
+  ObjModelCache::cacheModel(std::string(ASSET_PATH) + "low_poly_rock_2.obj", CachedModelType::SmallRock);
+  ObjModelCache::cacheModel(std::string(ASSET_PATH) + "low_poly_tree.obj", CachedModelType::Tree);
+  ObjModelCache::cacheModel(std::string(ASSET_PATH) + "low_poly_pine.obj", CachedModelType::Tree2);
+  ObjModelCache::cacheModel(std::string(ASSET_PATH) + "low_poly_tree_3.obj", CachedModelType::Tree3);
+  ObjModelCache::cacheModel(std::string(ASSET_PATH) + "low_poly_bridge.obj", CachedModelType::Bridge);
 
   Shader gridShader(
-    "/home/christoph/dev/3D-Playground/app/Graphics/grid.vert",
-    "/home/christoph/dev/3D-Playground/app/Graphics/grid.geom",
-    "/home/christoph/dev/3D-Playground/app/Graphics/grid.frag");
+    std::string(SHADER_PATH) + "grid.vert",
+    std::string(SHADER_PATH) + "grid.geom",
+    std::string(SHADER_PATH) + "grid.frag");
   Shader waterShader(
-    "/home/christoph/dev/3D-Playground/app/Graphics/water.vert",
-    "/home/christoph/dev/3D-Playground/app/Graphics/water.geom",
-    "/home/christoph/dev/3D-Playground/app/Graphics/water.frag");
+    std::string(SHADER_PATH) + "water.vert",
+    std::string(SHADER_PATH) + "water.geom",
+    std::string(SHADER_PATH) + "water.frag");
   Shader gridShadowShader(
-    "/home/christoph/dev/3D-Playground/app/Graphics/shadow.vert",
-    "/home/christoph/dev/3D-Playground/app/Graphics/shadow.frag");
+    std::string(SHADER_PATH) + "shadow.vert",
+    std::string(SHADER_PATH) + "shadow.frag");
   Shader instancedModelShader(
-    "/home/christoph/dev/3D-Playground/app/Graphics/instancedmodel.vert",
-    "/home/christoph/dev/3D-Playground/app/Graphics/instancedmodel.geom",
-    "/home/christoph/dev/3D-Playground/app/Graphics/instancedmodel.frag");
+    std::string(SHADER_PATH) + "instancedmodel.vert",
+    std::string(SHADER_PATH) + "instancedmodel.geom",
+    std::string(SHADER_PATH) + "instancedmodel.frag");
   Shader instancedModelShadowShader(
-    "/home/christoph/dev/3D-Playground/app/Graphics/modelShadow.vert",
-    "/home/christoph/dev/3D-Playground/app/Graphics/shadow.frag");
+    std::string(SHADER_PATH) + "modelShadow.vert",
+    std::string(SHADER_PATH) + "shadow.frag");
 
   ShaderCache::addShader(std::move(gridShader), ShaderType::Grid);
   ShaderCache::addShader(std::move(waterShader), ShaderType::Water);
