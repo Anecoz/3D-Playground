@@ -97,8 +97,8 @@ void GridGenerator::update(const Camera& camera, double delta, std::vector<Grid*
 
     if (worker._state == Worker::State::ResultReady) {
       auto result = worker.takeResult();
-      int gridXIdx = static_cast<int>(result->_gridPosition.x) / _gridSize;
-      int gridZIdx = static_cast<int>(result->_gridPosition.z) / _gridSize;
+      int gridXIdx = static_cast<int>(result->_gridPosition.x) / static_cast<int>(_gridSize);
+      int gridZIdx = static_cast<int>(result->_gridPosition.z) / static_cast<int>(_gridSize);
 
       // Remove from currently generating
       for (auto it = _currentlyGenerating.begin(); it != _currentlyGenerating.end(); ++it) {
@@ -232,8 +232,8 @@ GridGenerator::GridData* GridGenerator::Worker::generateData(std::size_t size, c
 {
   NoiseGenerator generator(size, (int)posOffset.x, (int)posOffset.z);
 
-  unsigned numVerts = (size + 1) * (size + 1) * 3;
-  unsigned numIndices = size * size * 6;
+  unsigned numVerts = static_cast<unsigned>((size + 1) * (size + 1) * 3);
+  unsigned numIndices = static_cast<unsigned>(size * size * 6);
 
   // Terrain
   GridData* data = new GridData;
@@ -267,9 +267,9 @@ GridGenerator::GridData* GridGenerator::Worker::generateData(std::size_t size, c
         data->_containsWater = true;
       }
 
-      unsigned offset = 3 * (y * (size + 1));
+      unsigned offset = static_cast<unsigned>(3 * (y * (size + 1)));
       data->_vertices[offset + (x * 3) + 0] = (GLfloat)x;
-      data->_vertices[offset + (x * 3) + 1] = height;
+      data->_vertices[offset + (x * 3) + 1] = (GLfloat)height;
       data->_vertices[offset + (x * 3) + 2] = (GLfloat)y;
 
       // Water
@@ -280,14 +280,14 @@ GridGenerator::GridData* GridGenerator::Worker::generateData(std::size_t size, c
       // Decorations
       DecorationData decData = generator.getDecorationDataAt(x, y);
       if (decData._type != DecorationType::Nothing) {
-        double height = generator.getHeightAt(x + decData._offsetX, y + decData._offsetZ);
+        double height = generator.getHeightAt(x + (int)decData._offsetX, y + (int)decData._offsetZ);
 
         // getHeightAt will return a huge number if we're outside of map
         if (height < 9000000.0 /*&& height >= -15.0 && height <= 10.0*/) {
           glm::vec3 pos(dx + decData._offsetX, height, dy + decData._offsetZ);
           pos += posOffset;
           glm::mat4 translation = glm::translate(pos);
-          glm::mat4 scale = glm::scale(glm::vec3(decData._scale));
+          glm::mat4 scale = glm::scale(glm::vec3((float)decData._scale));
           glm::mat4 rotation = glm::yawPitchRoll(
             glm::radians(decData._yRotDeg),
             glm::radians(decData._xRotDeg),
@@ -298,23 +298,24 @@ GridGenerator::GridData* GridGenerator::Worker::generateData(std::size_t size, c
     }
   }
 
-  for (unsigned y = 0; y < size; ++y) {
-    for (unsigned x = 0; x < size; ++x) {
+  unsigned uSize = (unsigned)size;
+  for (unsigned y = 0; y < uSize; ++y) {
+    for (unsigned x = 0; x < uSize; ++x) {
       // Terrain
-      data->_indices[6 * size * y + (x * 6) + 0] = y * (size + 1) + x;
-      data->_indices[6 * size * y + (x * 6) + 1] = (y + 1) * (size + 1) + (x + 1);
-      data->_indices[6 * size * y + (x * 6) + 2] = y * (size + 1) + (x + 1);
-      data->_indices[6 * size * y + (x * 6) + 3] = y * (size + 1) + x;
-      data->_indices[6 * size * y + (x * 6) + 4] = (y + 1) * (size + 1) + x;
-      data->_indices[6 * size * y + (x * 6) + 5] = (y + 1) * (size + 1) + (x + 1);
+      data->_indices[6 * uSize * y + (x * 6) + 0] = y * (uSize + 1) + x;
+      data->_indices[6 * uSize * y + (x * 6) + 1] = (y + 1) * (uSize + 1) + (x + 1);
+      data->_indices[6 * uSize * y + (x * 6) + 2] = y * (uSize + 1) + (x + 1);
+      data->_indices[6 * uSize * y + (x * 6) + 3] = y * (uSize + 1) + x;
+      data->_indices[6 * uSize * y + (x * 6) + 4] = (y + 1) * (uSize + 1) + x;
+      data->_indices[6 * uSize * y + (x * 6) + 5] = (y + 1) * (uSize + 1) + (x + 1);
 
       // Water
-      data->_waterIndices[6 * size * y + (x * 6) + 0] = y * (size + 1) + x;
-      data->_waterIndices[6 * size * y + (x * 6) + 1] = (y + 1) * (size + 1) + (x + 1);
-      data->_waterIndices[6 * size * y + (x * 6) + 2] = y * (size + 1) + (x + 1);
-      data->_waterIndices[6 * size * y + (x * 6) + 3] = y * (size + 1) + x;
-      data->_waterIndices[6 * size * y + (x * 6) + 4] = (y + 1) * (size + 1) + x;
-      data->_waterIndices[6 * size * y + (x * 6) + 5] = (y + 1) * (size + 1) + (x + 1);
+      data->_waterIndices[6 * uSize * y + (x * 6) + 0] = y * (uSize + 1) + x;
+      data->_waterIndices[6 * uSize * y + (x * 6) + 1] = (y + 1) * (uSize + 1) + (x + 1);
+      data->_waterIndices[6 * uSize * y + (x * 6) + 2] = y * (uSize + 1) + (x + 1);
+      data->_waterIndices[6 * uSize * y + (x * 6) + 3] = y * (uSize + 1) + x;
+      data->_waterIndices[6 * uSize * y + (x * 6) + 4] = (y + 1) * (uSize + 1) + x;
+      data->_waterIndices[6 * uSize * y + (x * 6) + 5] = (y + 1) * (uSize + 1) + (x + 1);
     }
   }
 

@@ -108,7 +108,7 @@ void IndexedVertexArray::updateInstanceMatrices(const std::vector<glm::mat4>& mo
   unbind();
 }
 
-void IndexedVertexArray::drawInstanced(int numInstances)
+void IndexedVertexArray::drawInstanced(GLsizei numInstances)
 {
   bind();
   glDrawElementsInstanced(GL_TRIANGLES, _count, GL_UNSIGNED_INT, 0L, numInstances);

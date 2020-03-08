@@ -106,7 +106,7 @@ void Shader::uploadVec(const glm::vec4& vec, const std::string& name) const
 void Shader::uploadVecArr(const std::vector<glm::vec2>& vecArr, const std::string& name) const
 {
 	GLint loc = getUniformLocation(name);
-	GLint size = vecArr.size();
+	GLint size = (GLint)vecArr.size();
 	glUniform3fv(loc, size, &vecArr[0].x);
 }
 

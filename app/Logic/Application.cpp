@@ -118,7 +118,7 @@ void Application::initWindowHandle()
 		exit(-3);
 	}
 
-	glClearColor(5.0/255.0, 209.0/255.0, 255.0/255.0, 0.0);
+	glClearColor((GLclampf)(5.0/255.0), (GLclampf)(209.0/255.0), (GLclampf)(255.0/255.0), (GLclampf)0.0);
 	glEnable(GL_DEPTH_TEST);
   std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
   std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;

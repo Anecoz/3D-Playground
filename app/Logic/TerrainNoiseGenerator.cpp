@@ -113,7 +113,7 @@ void NoiseGenerator::buildHeightMap()
   utils::NoiseMapBuilderPlane heightMapBuilder;
   heightMapBuilder.SetSourceModule (finalTerrain);
   heightMapBuilder.SetDestNoiseMap (_heightMap);
-  heightMapBuilder.SetDestSize (_mapSize, _mapSize);
+  heightMapBuilder.SetDestSize ((int)_mapSize, (int)_mapSize);
 
   heightMapBuilder.SetBounds (
     (double)_xOffset/(double)_mapSize * _scale,
@@ -150,7 +150,7 @@ void NoiseGenerator::buildDecorationMap()
   utils::NoiseMapBuilderPlane heightMapBuilder;
   heightMapBuilder.SetSourceModule (binary);
   heightMapBuilder.SetDestNoiseMap (_decorationMap);
-  heightMapBuilder.SetDestSize (_mapSize, _mapSize);
+  heightMapBuilder.SetDestSize ((int)_mapSize, (int)_mapSize);
 
   heightMapBuilder.SetBounds (
     (double)_xOffset/(double)_mapSize * _scale,
@@ -177,7 +177,7 @@ void NoiseGenerator::buildDecorationScaleMap()
   utils::NoiseMapBuilderPlane heightMapBuilder;
   heightMapBuilder.SetSourceModule (clamper);
   heightMapBuilder.SetDestNoiseMap (_decorationScaleMap);
-  heightMapBuilder.SetDestSize (_mapSize, _mapSize);
+  heightMapBuilder.SetDestSize ((int)_mapSize, (int)_mapSize);
 
   heightMapBuilder.SetBounds (
     (double)_xOffset/(double)_mapSize * _scale,
@@ -201,7 +201,7 @@ void NoiseGenerator::buildDecorationOffsetMaps()
   utils::NoiseMapBuilderPlane heightMapBuilderX;
   heightMapBuilderX.SetSourceModule (scaleBiasX);
   heightMapBuilderX.SetDestNoiseMap (_decorationOffsetMapX);
-  heightMapBuilderX.SetDestSize (_mapSize, _mapSize);
+  heightMapBuilderX.SetDestSize ((int)_mapSize, (int)_mapSize);
 
   heightMapBuilderX.SetBounds (
     (double)_xOffset/(double)_mapSize * _scale,
@@ -222,7 +222,7 @@ void NoiseGenerator::buildDecorationOffsetMaps()
   utils::NoiseMapBuilderPlane heightMapBuilderZ;
   heightMapBuilderZ.SetSourceModule (scaleBiasZ);
   heightMapBuilderZ.SetDestNoiseMap (_decorationOffsetMapZ);
-  heightMapBuilderZ.SetDestSize (_mapSize, _mapSize);
+  heightMapBuilderZ.SetDestSize ((int)_mapSize, (int)_mapSize);
 
   heightMapBuilderZ.SetBounds (
     (double)_xOffset/(double)_mapSize * _scale,
@@ -246,7 +246,7 @@ void NoiseGenerator::buildDecorationRotMaps()
   utils::NoiseMapBuilderPlane heightMapBuilderX;
   heightMapBuilderX.SetSourceModule (scaleBiasX);
   heightMapBuilderX.SetDestNoiseMap (_decorationRotX);
-  heightMapBuilderX.SetDestSize (_mapSize, _mapSize);
+  heightMapBuilderX.SetDestSize ((int)_mapSize, (int)_mapSize);
 
   heightMapBuilderX.SetBounds (
     (double)_xOffset/(double)_mapSize * _scale,
@@ -268,7 +268,7 @@ void NoiseGenerator::buildDecorationRotMaps()
   utils::NoiseMapBuilderPlane heightMapBuilderY;
   heightMapBuilderY.SetSourceModule (scaleBiasY);
   heightMapBuilderY.SetDestNoiseMap (_decorationRotY);
-  heightMapBuilderY.SetDestSize (_mapSize, _mapSize);
+  heightMapBuilderY.SetDestSize ((int)_mapSize, (int)_mapSize);
 
   heightMapBuilderY.SetBounds (
     (double)_xOffset/(double)_mapSize * _scale,
@@ -289,7 +289,7 @@ void NoiseGenerator::buildDecorationRotMaps()
   utils::NoiseMapBuilderPlane heightMapBuilderZ;
   heightMapBuilderZ.SetSourceModule (scaleBiasZ);
   heightMapBuilderZ.SetDestNoiseMap (_decorationRotZ);
-  heightMapBuilderZ.SetDestSize (_mapSize, _mapSize);
+  heightMapBuilderZ.SetDestSize ((int)_mapSize, (int)_mapSize);
 
   heightMapBuilderZ.SetBounds (
     (double)_xOffset/(double)_mapSize * _scale,
@@ -301,8 +301,8 @@ void NoiseGenerator::buildDecorationRotMaps()
 
 double NoiseGenerator::getHeightAt(int x, int z)
 {
-  x += _mapBufferSize/2;
-  z += _mapBufferSize/2;
+  x += (int)_mapBufferSize/2;
+  z += (int)_mapBufferSize/2;
   if (x <= 0 || x >= _mapSize || z <= 0 || z >= _mapSize) {
     return 10000000.0;
   }
@@ -315,8 +315,8 @@ DecorationData NoiseGenerator::getDecorationDataAt(int x, int z)
   DecorationData data;
   data._type = DecorationType::Nothing;
 
-  x += _mapBufferSize/2;
-  z += _mapBufferSize/2;
+  x += (int)_mapBufferSize/2;
+  z +=(int) _mapBufferSize/2;
   if (x < 0 || x > _mapSize || z < 0 || z > _mapSize) {
     return data;
   }

@@ -34,7 +34,7 @@ public:
 	
 	void draw() override;
   void drawTesselated();
-  void drawInstanced(int numInstances);
+  void drawInstanced(GLsizei numInstances);
 	
 private:
   GLuint _instanceBo;

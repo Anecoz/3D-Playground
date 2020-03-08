@@ -39,8 +39,8 @@ Grid::Grid(
   , _mesh(nullptr)
   , _models(std::move(models))
 {
-  unsigned numVerts = (_size + 1) * (_size + 1) * 3;
-  unsigned numIndices = _size * _size * 6;
+  unsigned numVerts = static_cast<unsigned>((_size + 1) * (_size + 1) * 3);
+  unsigned numIndices = static_cast<unsigned>(_size * _size * 6);
 
   _mesh = std::make_unique<IndexedVertexArray>(verts, indices, numVerts, numIndices, 3);
 

@@ -109,7 +109,7 @@ void Camera::freelookUpdate(double delta)
 
 void Camera::handleFreelookInput(double delta)
 {
-  GLfloat speedModifier = _speed;
+  GLfloat speedModifier = static_cast<GLfloat>(_speed);
 
   if (KeyInput::isKeyDown(GLFW_KEY_SPACE))
     speedModifier += 3.0;
@@ -118,7 +118,7 @@ void Camera::handleFreelookInput(double delta)
   if (KeyInput::isKeyDown(GLFW_KEY_LEFT_ALT))
     speedModifier += 300.0;
 
-  GLfloat speed = (speedModifier*delta);
+  GLfloat speed = static_cast<GLfloat>((speedModifier*delta));
 
   glm::vec3 movement(0.0, 0.0, 0.0);
 

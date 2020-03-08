@@ -22,11 +22,11 @@ DrawableCube::DrawableCube()
       (GLuint*)&data._indices[0],
       (GLfloat*)&data._normals[0],
       (GLfloat*)&data._colors[0],
-      data._colors.size(),
-      data._normals.size(),
-      data._vertices.size(),
-      data._indices.size(),
-      3)));
+      (GLint)data._colors.size(),
+      (GLint)data._normals.size(),
+      (GLint)data._vertices.size(),
+      (GLint)data._indices.size(),
+      (GLint)3)));
 }
 
 void DrawableCube::draw(const Camera& camera)

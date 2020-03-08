@@ -24,10 +24,10 @@ InstancedModel::InstancedModel(CachedModelType type)
       (GLfloat*)&data._vertices[0],
       (GLuint*)&data._indices[0],
       (GLfloat*)&data._colors[0],
-      data._colors.size(),
-      data._vertices.size(),
-      data._indices.size(),
-      3,
+      (GLint)data._colors.size(),
+      (GLint)data._vertices.size(),
+      (GLint)data._indices.size(),
+      (GLint)3,
       true
     ));
   }
@@ -95,7 +95,7 @@ void InstancedModel::draw(const Camera& camera)
   shader.uploadMatrix(camera.getCamMatrix(), "camMatrix");
   shader.uploadMatrix(camera.getProjection(), "projMatrix");
   shader.uploadVec(camera.getPosition(), "cameraPos");
-  _mesh->drawInstanced(_numInstances);
+  _mesh->drawInstanced((GLsizei)_numInstances);
   shader.unbind();
 }
 
@@ -112,6 +112,6 @@ void InstancedModel::drawShadowPass(const Camera& shadowCamera)
   shadowShader.uploadMatrix(shadowCamera.getCamMatrix(), "camMatrix");
   shadowShader.uploadMatrix(shadowCamera.getProjection(), "projMatrix");
   shadowShader.uploadVec(shadowCamera.getPosition(), "cameraPos");
-  _mesh->drawInstanced(_numInstances);
+  _mesh->drawInstanced((GLsizei)_numInstances);
   shadowShader.unbind();
 }
