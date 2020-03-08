@@ -12,3 +12,5 @@ _deps
 build/
 .vscode/*
 *.code-workspace
+CMakeSettings.json
+.vs/
