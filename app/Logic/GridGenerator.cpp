@@ -133,6 +133,9 @@ void GridGenerator::update(const Camera& camera, double delta, std::vector<Grid*
         if (decorationData._type == DecorationType::Rock) {
           model = new InstancedModel(CachedModelType::Rock);          
         }
+        if (decorationData._type == DecorationType::Fence) {
+          model = new InstancedModel(CachedModelType::Fence);
+        }
 
         if (model) {
           model->setBoundingBox(std::move(decorationData._boundingBox));
@@ -204,7 +207,7 @@ void GridGenerator::GridData::addDecorationData(DecorationType type, glm::mat4&&
         }
       }
     }
-  }  
+  }
 
   auto it = std::find_if(_decorationData.begin(), _decorationData.end(), [type](const GridDecorationData& data) {
     return data._type == type;

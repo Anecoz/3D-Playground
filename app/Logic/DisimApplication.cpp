@@ -38,7 +38,7 @@ DisimApplication::DisimApplication()
   double yRot = std::acos(glm::dot(glm::vec3(0.0, 0.0, 1.0), dir));
 
   // Bridge is 30m long
-  double scaleFactor = distance / 30.0;
+  double scaleFactor = 30.0 / 30.0;
   glm::mat4 scale = glm::scale(glm::vec3(scaleFactor, scaleFactor, scaleFactor));
   glm::mat4 rot = glm::yawPitchRoll(yRot, 0.0, 0.0);
   glm::mat4 translation = glm::translate(avg);
@@ -58,6 +58,7 @@ void DisimApplication::fillCaches()
   ObjModelCache::cacheModel(std::string(ASSET_PATH) + "low_poly_pine.obj", CachedModelType::Tree2);
   ObjModelCache::cacheModel(std::string(ASSET_PATH) + "low_poly_tree_3.obj", CachedModelType::Tree3);
   ObjModelCache::cacheModel(std::string(ASSET_PATH) + "low_poly_bridge.obj", CachedModelType::Bridge);
+  ObjModelCache::cacheModel(std::string(ASSET_PATH) + "low_poly_fence.obj", CachedModelType::Fence);
 
   Shader gridShader(
     std::string(SHADER_PATH) + "grid.vert",

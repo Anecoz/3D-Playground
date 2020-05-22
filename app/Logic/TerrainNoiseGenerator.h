@@ -11,7 +11,8 @@ enum class DecorationType
   SmallRock,
   Tree,
   Tree2,
-  Tree3
+  Tree3,
+  Fence
 };
 
 struct DecorationData
@@ -40,6 +41,7 @@ private:
   void buildDecorationScaleMap();
   void buildDecorationOffsetMaps();
   void buildDecorationRotMaps();
+  void buildRoadMaps();
 
   const std::size_t _mapBufferSize = 16;;
   std::size_t _mapSize;
@@ -52,6 +54,7 @@ private:
   noise::utils::NoiseMap _decorationRotX;
   noise::utils::NoiseMap _decorationRotY;
   noise::utils::NoiseMap _decorationRotZ;
+  noise::utils::NoiseMap _roadMap;
 
   double _scale;
   int _xOffset;

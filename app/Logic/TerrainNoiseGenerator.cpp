@@ -17,6 +17,7 @@ NoiseGenerator::NoiseGenerator(std::size_t mapSize, int xOffset, int yOffset)
   buildDecorationScaleMap();
   buildDecorationOffsetMaps();
   buildDecorationRotMaps();
+  buildRoadMaps();
 }
 
 void NoiseGenerator::buildHeightMap()
@@ -59,7 +60,7 @@ void NoiseGenerator::buildHeightMap()
 
   module::ScaleBias flatTerrain;
   flatTerrain.SetSourceModule (0, baseFlatTerrain);
-  flatTerrain.SetScale (0.25);
+  flatTerrain.SetScale (0.15);
   flatTerrain.SetBias (-0.25);
 
   module::RidgedMulti river;
@@ -110,8 +111,32 @@ void NoiseGenerator::buildHeightMap()
   finalTerrain.SetBounds(-10.0, -0.5);
   finalTerrain.SetEdgeFalloff(0.125);
 
+  module::RidgedMulti roads;
+  roads.SetFrequency(0.02);
+  roads.SetOctaveCount(1);
+  roads.SetLacunarity(0.1);
+  roads.SetSeed(12398);
+
+  module::ScaleBias preInvertScaleRoad;
+  preInvertScaleRoad.SetSourceModule(0, roads);
+  preInvertScaleRoad.SetScale(4.0);
+
+  module::Invert roadsInvert;
+  roadsInvert.SetSourceModule(0, preInvertScaleRoad);
+  
+  module::Clamp roadClamp;
+  roadClamp.SetSourceModule(0, roadsInvert);
+  roadClamp.SetBounds(-1.0, -0.9);
+
+  module::Select finalFinalTerrain;
+  finalFinalTerrain.SetSourceModule(0, finalTerrain);
+  finalFinalTerrain.SetSourceModule(1, flatTerrain);
+  finalFinalTerrain.SetControlModule(roadClamp);
+  finalFinalTerrain.SetBounds(-2.0, -0.9);
+  finalFinalTerrain.SetEdgeFalloff(0.05);
+
   utils::NoiseMapBuilderPlane heightMapBuilder;
-  heightMapBuilder.SetSourceModule (finalTerrain);
+  heightMapBuilder.SetSourceModule (finalFinalTerrain);
   heightMapBuilder.SetDestNoiseMap (_heightMap);
   heightMapBuilder.SetDestSize ((int)_mapSize, (int)_mapSize);
 
@@ -299,6 +324,38 @@ void NoiseGenerator::buildDecorationRotMaps()
   heightMapBuilderZ.Build ();
 }
 
+void NoiseGenerator::buildRoadMaps()
+{
+  module::RidgedMulti roads;
+  roads.SetFrequency(0.02);
+  roads.SetOctaveCount(1);
+  roads.SetLacunarity(0.1);
+  roads.SetSeed(12398);
+
+  module::ScaleBias preInvertScaleRoad;
+  preInvertScaleRoad.SetSourceModule(0, roads);
+  preInvertScaleRoad.SetScale(4.0);
+
+  module::Invert roadsInvert;
+  roadsInvert.SetSourceModule(0, preInvertScaleRoad);
+  
+  module::Clamp clamp;
+  clamp.SetSourceModule(0, roadsInvert);
+  clamp.SetBounds(-1.0, -0.9);
+
+  utils::NoiseMapBuilderPlane builder;
+  builder.SetSourceModule (clamp);
+  builder.SetDestNoiseMap (_roadMap);
+  builder.SetDestSize ((int)_mapSize, (int)_mapSize);
+
+  builder.SetBounds (
+    (double)_xOffset/(double)_mapSize * _scale,
+    (double)_xOffset/(double)_mapSize * _scale + _scale,
+    (double)_yOffset/(double)_mapSize * _scale,
+    (double)_yOffset/(double)_mapSize * _scale + _scale);
+  builder.Build ();
+}
+
 double NoiseGenerator::getHeightAt(int x, int z)
 {
   x += (int)_mapBufferSize/2;
@@ -324,11 +381,10 @@ DecorationData NoiseGenerator::getDecorationDataAt(int x, int z)
   // For sparsity
   if (x % 6 != 0 || z % 6 != 0) {
     return data;
-  }
+  }  
 
   // Sample decorationMap, use value to determine type
   double value = _decorationMap.GetValue(x, z);
-  double height = getHeightAt(x, z);
   double scale = _decorationScaleMap.GetValue(x, z);
   double offsetX = _decorationOffsetMapX.GetValue(x, z);
   double offsetZ = _decorationOffsetMapZ.GetValue(x, z);
@@ -336,42 +392,58 @@ DecorationData NoiseGenerator::getDecorationDataAt(int x, int z)
   double rotY = _decorationRotY.GetValue(x, z);
   double rotZ = _decorationRotZ.GetValue(x, z);
 
-  // The output of the decoration map (for now) is binary, -1 or 1
-  if (value < 0.5) {
-    if (height > -13.5 && height < -11.5) {
-      data._type = DecorationType::Tree;
-    }
-    else if (height > -11.5 && height < -10.0) {
-      scale *= 1.2;
-      data._type = DecorationType::Tree2;
-    }
-    else if (height > -10.0 && height < -8.0) {
-      data._type = DecorationType::Tree3;
-    }
-    else if (height > -8.0 && height < -5.0) {
-      scale *= 0.5;
-      data._type = DecorationType::SmallRock;
-    }
-    else if (height > 15.0) {
-      data._type = DecorationType::Rock;
-    }
-    else {
-      scale *= 0.5;
-      data._type = DecorationType::Grass;
-    }
+  double height = getHeightAt(x, z);
+  double roadVal = _roadMap.GetValue(x, z);
+
+  if (roadVal < -0.99) {
+    data._type = DecorationType::Fence;
+    data._scale = 10.0;
+    data._offsetX = 0.0;
+    data._offsetZ = 0.0;
+    data._xRotDeg = 0.0;
+    data._yRotDeg = 0.0;
+    data._zRotDeg = 0.0;
   }
   else {
-    // Grass
-    data._type = DecorationType::Grass;
-    scale *= 0.5;
-  }
-
-  data._scale = scale;
-  data._offsetX = offsetX;
-  data._offsetZ = offsetZ;
-  data._xRotDeg = rotX;
-  data._yRotDeg = rotY;
-  data._zRotDeg = rotZ;
+    // The output of the decoration map (for now) is binary, -1 or 1
+    if (value < 0.5) {
+      if (height > -13.5 && height < -11.5) {
+        data._type = DecorationType::Tree;
+      }
+      else if (height > -11.5 && height < -10.0) {
+        scale *= 1.2;
+        rotX *= 0.5;
+        rotY *= 0.5;
+        rotZ *= 0.5;
+        data._type = DecorationType::Tree2;
+      }
+      else if (height > -10.0 && height < -8.0) {
+        data._type = DecorationType::Tree3;
+      }
+      else if (height > -8.0 && height < -5.0) {
+        scale *= 0.5;
+        data._type = DecorationType::SmallRock;
+      }
+      else if (height > 15.0) {
+        data._type = DecorationType::Rock;
+      }
+      else {
+        scale *= 0.5;
+        data._type = DecorationType::Grass;
+      }
+    }
+    else {
+      // Grass
+      data._type = DecorationType::Grass;
+      scale *= 0.5;
+    }
+    data._scale = scale;
+    data._offsetX = offsetX;
+    data._offsetZ = offsetZ;
+    data._xRotDeg = rotX;
+    data._yRotDeg = rotY;
+    data._zRotDeg = rotZ;
+  }  
 
   return data;
 }
