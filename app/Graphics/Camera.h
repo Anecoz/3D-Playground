@@ -32,6 +32,8 @@ public:
   bool insideFrustum(const glm::vec3& point) const;
   bool insideFrustum(const Box3D& box) const;
 
+  bool _enabled;
+
 private:
   void freelookUpdate(double delta);
   void handleFreelookInput(double delta);
