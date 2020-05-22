@@ -90,11 +90,11 @@ std::size_t Grid::getSize() const
   return _size;
 }
 
-void Grid::draw(const Camera& camera, const Texture& shadowMap, const glm::mat4& shadowMatrix)
+void Grid::draw(const Camera& camera, const Texture& shadowMap, const glm::mat4& shadowMatrix, const glm::vec3& lightDir)
 {
   for (auto& model: _models) {
     if (camera.insideFrustum(model->getBoundingBox())) {
-      model->draw(camera);
+      model->draw(camera, lightDir);
     }
   }
 
@@ -105,6 +105,7 @@ void Grid::draw(const Camera& camera, const Texture& shadowMap, const glm::mat4&
   const auto& shader = ShaderCache::getShader(ShaderType::Grid);
   shader.bind();
   shader.uploadVec(camera.getPosition(), "cameraPos");
+  shader.uploadVec(lightDir, "lightDir");
   shader.uploadMatrix(camera.getCamMatrix(), "camMatrix");
   shader.uploadMatrix(camera.getProjection(), "projMatrix");
   shader.uploadMatrix(_modelMatrix, "modelMatrix");

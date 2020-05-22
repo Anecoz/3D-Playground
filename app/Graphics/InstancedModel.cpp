@@ -82,7 +82,7 @@ const Box3D& InstancedModel::getBoundingBox()
   return _boundingBox;
 }
 
-void InstancedModel::draw(const Camera& camera)
+void InstancedModel::draw(const Camera& camera, const glm::vec3& lightDir)
 {
   if (!_mesh) {
     printf("InstancedModel: No mesh, not drawing\n");
@@ -95,6 +95,7 @@ void InstancedModel::draw(const Camera& camera)
   shader.uploadMatrix(camera.getCamMatrix(), "camMatrix");
   shader.uploadMatrix(camera.getProjection(), "projMatrix");
   shader.uploadVec(camera.getPosition(), "cameraPos");
+  shader.uploadVec(lightDir, "lightDir");
   _mesh->drawInstanced((GLsizei)_numInstances);
   shader.unbind();
 }
