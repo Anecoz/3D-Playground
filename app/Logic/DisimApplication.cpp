@@ -108,7 +108,7 @@ void DisimApplication::render()
   // Normal, post-shadow pass
   for (auto grid: _currentGrids) {
     if (_camera.insideFrustum(grid->getBoundingBox())) {
-      grid->draw(_camera, shadowMap, shadowCam.getCombined());
+      grid->draw(_camera, shadowMap, shadowCam.getCombined(), g_sunDirection);
     }
   }
 
@@ -119,7 +119,7 @@ void DisimApplication::render()
     }
   }
 
-  _testModel->draw(_camera);
+  _testModel->draw(_camera, g_sunDirection);
 }
 
 void DisimApplication::update(double delta)

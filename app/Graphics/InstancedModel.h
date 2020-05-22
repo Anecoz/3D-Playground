@@ -18,7 +18,7 @@ public:
   InstancedModel(CachedModelType type);
   ~InstancedModel();
 
-  void draw(const Camera& camera);
+  void draw(const Camera& camera, const glm::vec3& lightDir);
   void drawShadowPass(const Camera& shadowCamera);
 
   void setInstanceMatrices(std::vector<glm::mat4>&& offsets);

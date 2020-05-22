@@ -29,7 +29,7 @@ public:
     std::vector<std::unique_ptr<InstancedModel>>&& models);
   ~Grid();
 
-  void draw(const Camera& camera, const Texture& shadowMap, const glm::mat4& shadowMatrix);
+  void draw(const Camera& camera, const Texture& shadowMap, const glm::mat4& shadowMatrix, const glm::vec3& lightDir);
   void drawShadowPass(const Camera& shadowCamera);
   void drawWater(const Camera& camera);
 
