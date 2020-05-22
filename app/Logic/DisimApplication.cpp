@@ -1,9 +1,11 @@
 #include "DisimApplication.h"
 
 #include "../Graphics/Box3D.h"
+#include "../Input/KeyInput.h"
 #include "../Utils/GraphicsUtils.h"
 #include "../Utils/ObjModelCache.h"
 #include "../Utils/ShaderCache.h"
+#include "../imgui/imgui.h"
 
 #include <GLFW/glfw3.h>
 
@@ -122,6 +124,10 @@ void DisimApplication::render()
 
 void DisimApplication::update(double delta)
 {
+  if (KeyInput::isKeyClicked(GLFW_KEY_ESCAPE)) {
+    _camera._enabled = !_camera._enabled;
+  }
+
   _camera.update(delta);
 
   std::vector<Grid*> activeGrids;
@@ -132,4 +138,13 @@ void DisimApplication::update(double delta)
   /*for (auto grid: _currentGrids) {
     _terrainCollisionHandler.update(*grid, _camera, delta);
   }*/
+
+  // ImGui stuff
+  {
+    ImGui::Begin("Parameters");
+    ImGui::SliderFloat("Sun X", &g_sunDirection.x, -1.0f, 0.0f);
+    ImGui::SliderFloat("Sun Y", &g_sunDirection.y, -1.0f, 0.0f);
+    ImGui::SliderFloat("Sun Z", &g_sunDirection.z, -1.0f, 0.0f);
+    ImGui::End();
+  }
 }

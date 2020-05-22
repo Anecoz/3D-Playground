@@ -11,7 +11,8 @@
 #include <glm/gtx/transform.hpp>
 
 Camera::Camera(const glm::vec3& initialPosition, ProjectionType type)
-  : _yaw(0.0)
+  : _enabled(true)
+  , _yaw(0.0)
   , _pitch(0.0)
   , _roll(0.0)
   , _firstMouse(true)
@@ -95,7 +96,9 @@ void Camera::update(double delta)
   }
 
   // Check input and move camera
-  freelookUpdate(delta);
+  if (_enabled) {
+    freelookUpdate(delta);
+  }
 
   updateViewMatrix();
   updateFrustum();
