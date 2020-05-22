@@ -1,5 +1,9 @@
 #include "Application.h"
 
+#include "../imgui/imgui.h"
+#include "../imgui/imgui_impl_glfw.h"
+#include "../imgui/imgui_impl_opengl3.h"
+
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 
@@ -8,7 +12,6 @@
 #include "../Input/MouseButtonInput.h"
 
 #include <iostream>
-#include <chrono>
 #include <string>
 
 static void errorCallback(int error, const char* description)
@@ -25,22 +28,21 @@ Application::Application() :
 
   // Create gl window stuff
   initWindowHandle();
+
+  // Dear, imgui
+  initImgui();
 }
 
 Application::~Application()
 {
   glfwDestroyWindow(_window);
+  glfwTerminate();
 }
 
 void Application::run()
 {
-	// Init Main loop stuff
-	using namespace std::chrono;
-  auto ns = 1000000000.0 / 60.0;
-  auto timer = glfwGetTime();
-	//int updates = 0;
-	int frames = 0;
-	std::string ups = " ups ";
+  // Init Main loop stuff
+  int frames = 0;
   std::string fps = " fps";
 
   _running = true;
@@ -54,38 +56,62 @@ void Application::run()
     // Logic update
     glfwPollEvents();
 
+    // ImGui stuff
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    // Test IMGUI
+    {
+      static float f = 0.0f;
+      static int counter = 0;
+
+      ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+
+      ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+      //ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
+      //ImGui::Checkbox("Another Window", &show_another_window);
+
+      ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+      //ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+
+      if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+          counter++;
+      ImGui::SameLine();
+      ImGui::Text("counter = %d", counter);
+
+      ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+      ImGui::End();
+    }
+
     double now = glfwGetTime();
 		double delta = (now - lastUpdate);
     lastUpdate = now;
     update(delta);
 
-		// Logic Update
-		/*if (delta >= 1.0) {
-			glfwPollEvents();
-			updates++;
-			delta--;
-
-      update(delta);
-      lastTime = now;
-		}*/
-
 		// Render
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     render();
-		glfwSwapBuffers(_window);
-		// Render stop
+
+    // ImGui render
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+	  glfwSwapBuffers(_window);
+    // Render stop
 
 		frames++;
     double now2 = glfwGetTime();
 		if ((now2 - lastFrameUpdate) > 1.0) {
       lastFrameUpdate = now2;
-			//timer += 1000;
 			glfwSetWindowTitle(_window, std::string("Disim " + std::to_string(frames) + fps).c_str());
-			//updates = 0;
 			frames = 0;
 		}
 	}
   // Do cleanup here
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplGlfw_Shutdown();
+  ImGui::DestroyContext();
 }
 
 void Application::initWindowHandle()
@@ -128,4 +154,16 @@ void Application::initWindowHandle()
   std::cout << "Max supported patch vertices: " << std::to_string(maxPatchVertices) << std::endl;
   glPatchParameteri(GL_PATCH_VERTICES, 3);
   glEnable(GL_CULL_FACE);
+}
+
+void Application::initImgui()
+{
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+  ImGui::StyleColorsDark();
+
+  ImGui_ImplGlfw_InitForOpenGL(_window, true);
+  ImGui_ImplOpenGL3_Init();
 }

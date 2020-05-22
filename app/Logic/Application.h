@@ -17,6 +17,7 @@ protected:
 
 private:
 	void initWindowHandle();
+  void initImgui();
 
   bool _running;
 };
