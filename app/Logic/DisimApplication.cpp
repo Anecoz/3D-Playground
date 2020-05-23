@@ -89,11 +89,12 @@ void DisimApplication::fillCaches()
 }
 
 static glm::vec3 g_sunDirection = glm::normalize(glm::vec3(-0.7f, -0.7f, -0.7f));
+static float g_shadowFarMax = 1.0f;
 
 void DisimApplication::render()
 {
   // Shadow pass first
-  const Camera& shadowCam = _shadowGenerator.prepareShadowPass(_camera, g_sunDirection);
+  const Camera& shadowCam = _shadowGenerator.prepareShadowPass(_camera, g_sunDirection, g_shadowFarMax);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   for (auto grid: _currentGrids) {
@@ -151,6 +152,7 @@ void DisimApplication::update(double delta)
     ImGui::SliderFloat("Sun X", &g_sunDirection.x, -1.0f, 0.0f);
     ImGui::SliderFloat("Sun Y", &g_sunDirection.y, -1.0f, 0.0f);
     ImGui::SliderFloat("Sun Z", &g_sunDirection.z, -1.0f, 0.0f);
+    ImGui::SliderFloat("Shadow max", &g_shadowFarMax, 0.0f, 1.0f);
     ImGui::End();
   }
 }

@@ -2,11 +2,11 @@
 
 #include <cstdio>
 
-Fbo::Fbo(int width, int height, bool color, bool depth)
+Fbo::Fbo(int width, int height, bool color, int numDepth)
   : _width(width)
   , _height(height)
   , _color(color)
-  , _depth(depth)
+  , _numDepth(numDepth)
 {
 	initialiseFramebuffer();
 }
@@ -17,17 +17,18 @@ Fbo::~Fbo()
 	glDeleteTextures(1, &_colourTextureId);
 }
 
-void Fbo::bind()
+void Fbo::bind(std::size_t depthIndex)
 {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, _fboId);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _depthTextureIds[depthIndex], 0);
 	glViewport(0, 0, _width, _height);
 }
 
 void Fbo::unbind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, 1920, 1080); // ADD CORRECT RESOLUTION
+	glViewport(0, 0, 1920, 1080); // TODO: ADD CORRECT RESOLUTION
 }
 
 void Fbo::initialiseFramebuffer()
@@ -36,7 +37,7 @@ void Fbo::initialiseFramebuffer()
   //if (_color) {
     createTextureAttachment();
   //}
-  if (_depth) {
+  if (_numDepth > 0) {
     createDepthBufferAttachment();
   }
 
@@ -69,12 +70,14 @@ void Fbo::createTextureAttachment()
 
 void Fbo::createDepthBufferAttachment()
 {
-	glGenTextures(1, &_depthTextureId);
-	glBindTexture(GL_TEXTURE_2D, _depthTextureId);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, _width, _height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _depthTextureId, 0);
+  _depthTextureIds.reserve(_numDepth);
+  for (unsigned i = 0; i < _numDepth; ++i) {
+    glGenTextures(1, &_depthTextureIds[i]);
+    glBindTexture(GL_TEXTURE_2D, _depthTextureIds[i]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, _width, _height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  }	
 }
