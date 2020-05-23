@@ -16,7 +16,7 @@ Camera::Camera(const glm::vec3& initialPosition, ProjectionType type)
   , _pitch(0.0)
   , _roll(0.0)
   , _firstMouse(true)
-  , _projection(glm::perspective(glm::radians(45.0), 16.0/9.0, 0.1, 1000.0))  
+  , _projection(glm::perspective(glm::radians(75.0), 16.0/9.0, 0.1, 1000.0))  
   , _position(initialPosition)
   , _forward(0.0f, 0.0f, 0.0f)
   , _cameraMatrix(glm::lookAt(_position, _forward, _up))
@@ -53,8 +53,8 @@ void Camera::updateFrustum()
 void Camera::updateViewMatrix()
 {
   glm::mat4 view = glm::translate(_position);
-  view *= glm::rotate((float)_yaw, glm::vec3(0, 1, 0));
-  view *= glm::rotate((float)_pitch, glm::vec3(1, 0, 0));
+  view *= glm::rotate((float)_yaw, glm::vec3(0.0f, 1.0f, 0.0f));
+  view *= glm::rotate((float)_pitch, glm::vec3(1.0f, 0.0f, 0.0f));
   _cameraMatrix = glm::inverse(view);
 
   _right = glm::normalize(view[0]);
@@ -108,7 +108,6 @@ void Camera::update(double delta)
 
   updateViewMatrix();
   updateFrustum();
-  //std::cout << "Camera at: " << _position.x << ", " << _position.y << ", " << _position.z << std::endl;
 }
 
 void Camera::freelookUpdate(double delta)

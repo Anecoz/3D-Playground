@@ -12,7 +12,7 @@ public:
   ShadowMapGenerator();
   ~ShadowMapGenerator();
 
-  const Camera& prepareShadowPass(const Camera& mainCamera, const glm::vec3& sunDirection);
+  const Camera& prepareShadowPass(const Camera& mainCamera, const glm::vec3& sunDirection, const float& testFarMax);
   void endShadowPass();
 
   const Texture& getShadowTexture();
