@@ -86,6 +86,12 @@ void Camera::setViewMatrix(const glm::mat4& viewMatrix)
   updateFrustum();
 }
 
+void Camera::setProjection(const glm::mat4& matrix)
+{
+  _projection = matrix;
+  updateFrustum();
+}
+
 void Camera::update(double delta)
 {
   if (_firstMouse) {
