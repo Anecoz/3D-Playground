@@ -107,4 +107,8 @@ void main() {
   float gamma = 1.8;
   result = pow(result, vec3(1.0/gamma));
   outColor = vec4(result, 1.0);
+
+  // TEST
+  //float closestDepth = texture(shadowMap, vec2(fragPosition.x / 64.0, fragPosition.z / 64.0)).r;
+  //outColor = vec4(closestDepth, closestDepth, closestDepth, 1.0);
 }
