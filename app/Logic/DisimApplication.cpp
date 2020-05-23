@@ -141,6 +141,12 @@ void DisimApplication::update(double delta)
 
   // ImGui stuff
   {
+    ImGui::Begin("Debug");
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    ImGui::Text("Camera pos %.1f, %.1f, %.1f", _camera.getPosition().x, _camera.getPosition().y, _camera.getPosition().z);
+    ImGui::End();
+  }
+  {
     ImGui::Begin("Parameters");
     ImGui::SliderFloat("Sun X", &g_sunDirection.x, -1.0f, 0.0f);
     ImGui::SliderFloat("Sun Y", &g_sunDirection.y, -1.0f, 0.0f);

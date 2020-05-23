@@ -7,6 +7,7 @@ uniform vec3 camPosition;
 in vec3 fragPosition;
 
 void main() {
-  float depth = length(fragPosition - camPosition);
+  // Doesn't matter
+  float depth = 0.0;//length(fragPosition - camPosition);
   outColor = vec4(vec3(depth), 1.0);
 }

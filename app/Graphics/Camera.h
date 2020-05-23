@@ -23,6 +23,7 @@ public:
 	void setPosition(const glm::vec3& posIn);
   void setYawPitchRoll(double yawDeg, double pitchDeg, double rollDeg);
   void setViewMatrix(const glm::mat4& matrix);
+  void setProjection(const glm::mat4& matrix);
 	glm::vec3 getPosition() const { return _position; }
   glm::mat4 getProjection() const { return _projection; }
   glm::mat4 getCamMatrix() const { return _cameraMatrix; }
