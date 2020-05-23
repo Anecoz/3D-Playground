@@ -9,6 +9,7 @@ static Shader g_EmptyShader = Shader();
 void ShaderCache::addShader(Shader&& shader, ShaderType type)
 {
   if (_cachedShaders.find(type) == _cachedShaders.end()) {
+    printf("Caching shader of type %d\n", static_cast<int>(type));
     _cachedShaders[type] = std::move(shader);
   }
 }

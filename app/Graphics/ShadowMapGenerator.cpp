@@ -3,6 +3,9 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/transform.hpp>
 
+#include <iostream>
+#include <vector>
+
 ShadowMapGenerator::ShadowMapGenerator()
   : _shadowFbo(4096, 4096, true, true)
   , _shadowCamera(glm::vec3(0.0, 0.0, 0.0), ProjectionType::Orthogonal)
@@ -17,10 +20,9 @@ const Camera& ShadowMapGenerator::prepareShadowPass(const Camera& mainCamera, co
 {
   _shadowFbo.bind();
 
-  // Try something else
-
+  // Calculates a "light" projection and view matrix that is perfectly aligned to the main cameras frustum.
   // Calculate frustum 8 points in world space
-  /*auto ndcToWorldCam = glm::inverse(mainCamera.getCombined());
+  auto ndcToWorldCam = glm::inverse(mainCamera.getCombined());
 
   std::vector<glm::vec3> ndcs;
   ndcs.emplace_back(-1.0, -1.0, -1.0);
@@ -32,52 +34,51 @@ const Camera& ShadowMapGenerator::prepareShadowPass(const Camera& mainCamera, co
   ndcs.emplace_back(-1.0,  1.0, -1.0);
   ndcs.emplace_back( 1.0,  1.0, -1.0);
 
-  std::vector<glm::vec3> cornersWorld;
+  std::vector<glm::vec4> cornersWorld;
+  glm::vec4 midPoint(0.0, 0.0, 0.0, 0.0);
   for (auto& ndc: ndcs) {
     glm::vec4 cornerWorld = ndcToWorldCam * glm::vec4(ndc, 1.0);
-    cornersWorld.emplace_back(cornerWorld.x / cornerWorld.w, cornerWorld.y / cornerWorld.w, cornerWorld.z / cornerWorld.w);
+    cornersWorld.emplace_back(cornerWorld.x / cornerWorld.w, cornerWorld.y / cornerWorld.w, cornerWorld.z / cornerWorld.w, 1.0);
+    midPoint += cornersWorld.back();
+  }
+  midPoint /= 8.0;
+
+  glm::mat4 lvMatrix = glm::lookAt(glm::vec3(midPoint) - glm::normalize(sunDirection), glm::vec3(midPoint), glm::vec3(0.0f, 1.0f, 0.0f));
+
+  glm::vec4 transf = lvMatrix * cornersWorld[0];
+  float minZ = transf.z;
+  float maxZ = transf.z;
+  float minX = transf.x;
+  float maxX = transf.x;
+  float minY = transf.y;
+  float maxY = transf.y;
+
+  for (unsigned int i = 1; i < 8; i++) {
+    transf = lvMatrix * cornersWorld[i];
+
+    if (transf.z > maxZ) maxZ = transf.z;
+    if (transf.z < minZ) minZ = transf.z;
+    if (transf.x > maxX) maxX = transf.x;
+    if (transf.x < minX) minX = transf.x;
+    if (transf.y > maxY) maxY = transf.y;
+    if (transf.y < minY) minY = transf.y;
   }
 
-  double minX = 1e20;
-  double minY = 1e20;
-  double minZ = 1e20;
-  double maxX = -1e20;
-  double maxY = -1e20;
-  double maxZ = -1e20;
+  glm::mat4 lpMatrix = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, minZ, maxZ);
 
-  for (auto& cornerWorld: cornersWorld) {
-    if (cornerWorld.x < minX) {
-      minX = cornerWorld.x;
-    }
-    if (cornerWorld.y < minY) {
-      minY = cornerWorld.y;
-    }
-    if (cornerWorld.z < minZ) {
-      minZ = cornerWorld.z;
-    }
-    if (cornerWorld.x > maxX) {
-      maxX = cornerWorld.x;
-    }
-    if (cornerWorld.y > maxY) {
-      maxY = cornerWorld.y;
-    }
-    if (cornerWorld.z > maxZ) {
-      maxZ = cornerWorld.z;
-    }
-  }
+  const float scaleX = 2.0f / (maxX - minX);
+  const float scaleY = 2.0f / (maxY - minY);
+  const float offsetX = -0.5f * (minX + maxX) * scaleX;
+  const float offsetY = -0.5f * (minY + maxY) * scaleY;
 
-  glm::vec3 center((minX + maxX) / 2.0, (minY + maxY) / 2.0, (minZ + maxZ) / 2.0);
-  std::cout << "min, max: " << minX << ", " << maxX << ", " << minY << ", " <<  maxY << ", " <<  minZ << ", " <<  maxZ << std::endl;
-  _shadowCamera.setProjection(glm::ortho(minX - center.x, maxX - center.x, minY - center.y, maxY - center.y, minZ - center.z, maxZ - center.z));
-  //_shadowCamera.setViewMatrix(glm::translate(-center));
-  _shadowCamera.setViewMatrix(glm::lookAt(center, center + glm::normalize(sunDirection), glm::vec3(0.0, 1.0, 0.0)));*/
+  glm::mat4 cropMatrix(1.0f);
+  cropMatrix[0][0] = scaleX;
+  cropMatrix[1][1] = scaleY;
+  cropMatrix[3][0] = offsetX;
+  cropMatrix[3][1] = offsetY;
 
-  // Old way
-  auto pos = mainCamera.getPosition();
-  auto forward = mainCamera.getForward();
-  glm::vec3 eye = pos - sunDirection * 50.0f;
-  glm::mat4 viewMat = glm::lookAt(eye, pos, glm::vec3(0.0, 1.0, 0.0));
-  _shadowCamera.setViewMatrix(viewMat);
+  _shadowCamera.setViewMatrix(lvMatrix);
+  _shadowCamera.setProjection(cropMatrix * lpMatrix);
 
   return _shadowCamera;
 }
