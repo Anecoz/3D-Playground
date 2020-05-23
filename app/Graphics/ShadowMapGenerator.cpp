@@ -64,21 +64,10 @@ const Camera& ShadowMapGenerator::prepareShadowPass(const Camera& mainCamera, co
     if (transf.y < minY) minY = transf.y;
   }
 
-  glm::mat4 lpMatrix = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, minZ, maxZ);
-
-  const float scaleX = 2.0f / (maxX - minX);
-  const float scaleY = 2.0f / (maxY - minY);
-  const float offsetX = -0.5f * (minX + maxX) * scaleX;
-  const float offsetY = -0.5f * (minY + maxY) * scaleY;
-
-  glm::mat4 cropMatrix(1.0f);
-  cropMatrix[0][0] = scaleX;
-  cropMatrix[1][1] = scaleY;
-  cropMatrix[3][0] = offsetX;
-  cropMatrix[3][1] = offsetY;
+  glm::mat4 lpMatrix = glm::ortho(minX, maxX, minY, maxY, minZ, maxZ);
 
   _shadowCamera.setViewMatrix(lvMatrix);
-  _shadowCamera.setProjection(cropMatrix * lpMatrix);
+  _shadowCamera.setProjection(lpMatrix);
 
   return _shadowCamera;
 }
