@@ -7,9 +7,9 @@
 #include <vector>
 
 ShadowMapGenerator::ShadowMapGenerator()
-  : _shadowFbo(4096, 4096, true, 1)
+  : _shadowFbo(8192, 8192, true, 1)
   , _shadowCamera(glm::vec3(0.0, 0.0, 0.0), ProjectionType::Orthogonal)
-  , _shadowTexture(4096, 4096, _shadowFbo.getDepthTextureId(0), GL_TEXTURE_2D)
+  , _shadowTexture(8192, 8192, _shadowFbo.getDepthTextureId(0), GL_TEXTURE_2D)
 {}
 
 ShadowMapGenerator::~ShadowMapGenerator()
@@ -82,8 +82,6 @@ const Camera& ShadowMapGenerator::prepareShadowPass(const Camera& mainCamera, co
 
   midPoint = wNearLeftBottom + wNearLeftTop + wNearRightBottom + wNearRightTop + wFarLeftBottom + wFarRightBottom + wFarRightTop + wFarLeftTop;
   midPoint /= 8.0;
-
-  std::cout << "midPoint: " << midPoint.x << ", " << midPoint.y << ", " << midPoint.z << std::endl;
 
   /*for (auto& ndc: ndcs) {
     glm::vec4 cornerWorld = ndcToWorldCam * glm::vec4(ndc.x, ndc.y, ndc.z, 1.0);
