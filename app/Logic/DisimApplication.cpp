@@ -20,9 +20,6 @@ DisimApplication::DisimApplication()
   : _camera(glm::vec3(10000.0, 500.0, 10000.0), ProjectionType::Perspective)
   , _gridGenerator(10)
 {
-  //std::cout << "Setting wireframe" << std::endl;
-  //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
   fillCaches();
 
   glEnable(GL_BLEND);
@@ -89,7 +86,8 @@ void DisimApplication::fillCaches()
 }
 
 static glm::vec3 g_sunDirection = glm::normalize(glm::vec3(-0.7f, -0.7f, -0.7f));
-static float g_shadowFarMax = 1.0f;
+static float g_shadowFarMax = 0.2f;
+static bool g_wireframe = false;
 
 void DisimApplication::render()
 {
@@ -153,6 +151,14 @@ void DisimApplication::update(double delta)
     ImGui::SliderFloat("Sun Y", &g_sunDirection.y, -1.0f, 0.0f);
     ImGui::SliderFloat("Sun Z", &g_sunDirection.z, -1.0f, 0.0f);
     ImGui::SliderFloat("Shadow max", &g_shadowFarMax, 0.0f, 1.0f);
+    if (ImGui::Checkbox("Wireframe", &g_wireframe)) {
+      if (g_wireframe) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      }
+      else {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+      }
+    }
     ImGui::End();
   }
 }
